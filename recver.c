@@ -15,11 +15,12 @@
 
 /* control the recver thread */
 static const int _ALIVE = 1;
-static const int _DEAD = !_ALIVE;
+static const int _DEAD = 0;
 
 static char buf[MAX_RECV_BUF + 1];
 static pthread_t thrd;
-static int recv_thread_status = ALIVE;
+static pthread_mutex_t _recv_thrd_mtx = PTHREAD_MUTEX_INITIALIZER;
+static int recv_thread_status = 0;
 
 /**
  * @brief    把从con中接收到的字节数保存到buf中, buf长度为len
@@ -84,15 +85,13 @@ void *daemon_recver(void *arg)
     start = 1;
     FD_SET(con->fd, &rset);
     max_fd = con->fd > max_fd ? con->fd + 1 : max_fd + 1;
-    tv.tv_sec = 1;
+    tv.tv_sec = 3;
     tv.tv_usec = 1000;
     ready = 0;
     while (start)
     {
-        e_debug("daemon_recver", "start select() now!");
         /* 默认阴塞式 */
-        ready = e_select(max_fd, &rset, NULL, NULL, NULL);
-        e_debug("my_debug", "ready = [%d]", ready);
+        ready = e_select(max_fd, &rset, NULL, NULL, &tv);
         if (ready)
         {
             recv_bytes = eme_recv(con, buf, MAX_RECV_BUF);
@@ -102,9 +101,14 @@ void *daemon_recver(void *arg)
             e_debug("daemon_recver", "select ready[%d], received[%d]",
                     ready, recv_bytes);
         }
-        else
+
+        /* thread exit or not, depend on the value of start */
+        /* start = get_recver_thrd_status(); */
+
+        if (con->state != CONNECTED)
         {
-            /*　TODO 接收线程退出等 */
+            e_debug("daemon_recver", "disconnected, daemon_recver exit!");
+            start = 0;
         }
     }
 
@@ -125,6 +129,43 @@ void init_recver_thrd(const conn_t *con)
         return;
     }
 
-    e_debug("init_thrd", "starting a new thread!");
-    pthread_create(&thrd, NULL, daemon_recver, (void*)con);
+    if (!get_recver_thrd_status()) /* thread exist */
+    {
+        e_debug("init_thrd", "starting a new thread!");
+        pthread_create(&thrd, NULL, daemon_recver, (void*)con);
+    }
+    else
+    {
+        e_debug("init_thrd", "daemon_recver exist!");
+    }
+}
+
+/**
+ * @brief  接收模块的结束
+ * @return void
+ */
+void uninit_recver_thrd()
+{
+    pthread_mutex_lock(&_recv_thrd_mtx);
+
+    recv_thread_status = _DEAD;
+
+    pthread_mutex_unlock(&_recv_thrd_mtx);
+}
+
+/**
+ * @brief  查询当前线程的状态, 便于判断是否结束
+ * @return 非0时正常运行, 反之接收模块将要退出
+ */
+int get_recver_thrd_status()
+{
+    int flg;
+    
+    pthread_mutex_lock(&_recv_thrd_mtx);
+
+    flg = recv_thread_status == _ALIVE ? 1 : 0;
+
+    pthread_mutex_unlock(&_recv_thrd_mtx);
+
+    return flg;
 }

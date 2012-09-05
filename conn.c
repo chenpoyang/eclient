@@ -104,7 +104,7 @@ int init_net_state(const char *host, int port)
     pthread_mutex_unlock(&_con_mtx);
 
     /* 启动接收线程 */
-    if (con.state == CONNECTED)
+    if (conn.state == CONNECTED)
     {
         e_debug("init_net_state", "connected, now start deamon recver");
         
