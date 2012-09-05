@@ -1,0 +1,6 @@
+test_trigger:
+    消息传递演示
+server:
+    间单服务回射
+	使用(主机端口默认127.0.0.1 8888):
+		$ ./server xxx.xxx.xxx.xxx port
