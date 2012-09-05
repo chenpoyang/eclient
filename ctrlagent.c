@@ -315,6 +315,7 @@ static void clear_dialog(int idx)
         dlg[idx].net_req = NULL;
         e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "net_req->req");
     }
+
     if (dlg[idx].net_req != NULL)
     {
         free(dlg[idx].net_req);
@@ -337,6 +338,12 @@ static void clear_dialog(int idx)
     }
 
     /* may by leak: ((type)ack)->(member) not free! */
+    if (dlg[idx].ack->nty != NULL)
+    {
+        free(dlg[idx].ack->nty);
+        dlg[idx].ack->nty = NULL;
+    }
+
     if (dlg[idx].ack != NULL)
     {
         free(dlg[idx].ack);

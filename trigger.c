@@ -32,6 +32,8 @@ void *trigger_daemon(void *arg)
     int start;
     agent_t *agt = (agent_t*)arg;
 
+    e_debug("trigger_daemon", "new trigger thread start!");
+    
     start = 1;
     while (start)
     {
@@ -56,6 +58,8 @@ void *trigger_daemon(void *arg)
 
         pthread_mutex_unlock(&agt->mtx);
     }
+    
+    e_debug("trigger_daemon", "a trigger thread exit!");
 
     pthread_exit(NULL);
 }

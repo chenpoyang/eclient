@@ -13,8 +13,13 @@
 #include "conn.h"
 #include "elog.h"
 
+/* control the recver thread */
+static const int _ALIVE = 1;
+static const int _DEAD = !_ALIVE;
+
 static char buf[MAX_RECV_BUF + 1];
 static pthread_t thrd;
+static int recv_thread_status = ALIVE;
 
 /**
  * @brief    把从con中接收到的字节数保存到buf中, buf长度为len
@@ -72,15 +77,15 @@ void *daemon_recver(void *arg)
     int recv_bytes, start = 0, max_fd = -2, ready;
     conn_t *con = (conn_t*)arg;
     fd_set rset; /* 读集合 */
-// struct timeval tv; /* 等待1秒 */
+    struct timeval tv; /* 等待1秒 */
 
     e_debug("daemon_recver", "revcer thread start!");
 
     start = 1;
     FD_SET(con->fd, &rset);
     max_fd = con->fd > max_fd ? con->fd + 1 : max_fd + 1;
-//    tv.tv_sec = 1;
-//    tv.tv_usec = 1000;
+    tv.tv_sec = 1;
+    tv.tv_usec = 1000;
     ready = 0;
     while (start)
     {

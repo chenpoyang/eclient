@@ -27,7 +27,7 @@ typedef struct _dlg_t {
     net_req_t *net_req;
     dlg_step_t step;
     dlg_res_t result;
-    void *ack;
+    net_notify_t *ack;
     void *data[MAX_DLG_MEMBER];
 } dlg_t;
 
