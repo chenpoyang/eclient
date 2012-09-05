@@ -22,7 +22,6 @@ static cmd_info_t g_cmd_info[] =
 static void deal_notify_evt(void *base, size_t len);
 static void deal_req_evt(void *base, size_t len);
 static int alloc_dialog(int cmd_info_idx);
-static void deal_dialog(int idx);
 static void clear_dialog(int idx);
 static int find_entrance(int cmd);
 
@@ -90,7 +89,7 @@ static void deal_notify_evt(void *base, size_t len)
     srand(time(NULL));
     res = rand() % 2;
 
-    e_fire_login_result(res);
+    e_login_result(res);
 }
 
 /**
@@ -171,7 +170,7 @@ static int alloc_dialog(int cmd)
  * @param    idx 会话标识
  * @return   void
  */
-static void deal_dialog(int idx)
+void deal_dialog(int idx)
 {
     int opr_id = -1;
 
@@ -237,7 +236,7 @@ void ctrl_elogin(size_t idx)
                 dlg[idx].result = DLG_RES_TIMEOUT;
                 e_error("ctrl_elogin",
                         "send to netagent failed, error[%d]", ret);
-                e_fire_login_result(ret);
+                e_login_result(ret);
                 clear_dialog(idx);
             }
             else
@@ -257,7 +256,7 @@ void ctrl_elogin(size_t idx)
                 e_debug("ctrl_elogin", "received netagent ack, dlg[%d]", idx);
 
                 dlg[idx].step = DLG_STEP_FINISH;
-                e_fire_login_result(n_login_res->result);
+                e_login_result(n_login_res->result);
             }
             else if (dlg[idx].result == DLG_RES_TIMEOUT)
             {
@@ -265,7 +264,7 @@ void ctrl_elogin(size_t idx)
                         "received netagent's result[%d], timeout!",
                         DLG_RES_TIMEOUT);
                 
-                e_fire_login_result(n_login_res->result);
+                e_login_result(n_login_res->result);
                 dlg[idx].step = DLG_STEP_FINISH;
             }
         }

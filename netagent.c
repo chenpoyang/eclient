@@ -49,7 +49,6 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
     int idx = -1;/* 会话id, 用于标识请求, 控制请求的生命周期, 清理资源等 */
 
     nty = (net_notify_t *)base;
-
     if (NULL == nty)
     {
         e_debug("deal_net_data", "data transfered from server is empty!");
@@ -61,6 +60,7 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
     {
         case EV_LOGIN:
             login_res = nty->nty;
+            
             e_debug("deal_net_data",
                     "transfered from server success, type[%s] result[%d]",
                     "EV_LOGIN", login_res->result);
@@ -73,6 +73,10 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
     }
         
     e_debug("deal_net_data", "received data from server, dialog id[%d]", idx);
+
+    dlg[idx].ack = nty;
+    dlg[idx].result = DLG_RES_ACK;
+    deal_dialog(idx); /* 到服务端的请求结束, 在客户端处理与UI交付及资源的清理 */
 }
 
 /**
