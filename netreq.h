@@ -5,7 +5,8 @@
 
 /* netagent 层请求事件 */
 typedef enum {
-    SV_LOGIN
+    SV_LOGIN,
+    SV_REGISTER
 } req_srv_t;
 
 /* netagent 层收到服务端回复事件类型 */

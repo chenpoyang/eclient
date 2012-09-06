@@ -25,6 +25,7 @@ static void deal_req_evt(void *base, size_t len);
 static int alloc_dialog(int cmd_info_idx);
 static void clear_dialog(int idx);
 static int find_entrance(int cmd);
+static void control_dialog(size_t, const req_srv_t, void **, size_t);
 
 /* entrance */
 void ctrlagent(int evt, void *base, size_t len, int cmd)
@@ -197,27 +198,88 @@ void deal_dialog(int idx)
  */
 void ctrl_eregister(size_t idx)
 {
-    int opr_id, ret;
     e_register_t *e_register = NULL; /* UI层请求的数据结构 */
     n_register_t n_register; /* 将准备发送到netagent的数据结构 */
     n_register_res_t *n_register_res = NULL; /* 请求最终返回的结果 */
     ctrl_req_t *req = NULL; /* 指向请求的结构, 类型不确定, 方便获取原请求的数据 */
     net_notify_t *nty = NULL; /* 最终返回到netagent的回应数据, 类型未知 */
+    req_srv_t evt = SV_REGISTER;
+    void *data;
 
+    e_register = (e_register_t*)req->req;
+    n_register.idx = idx;
+    strcpy(n_register.usr, e_register->usr);
+    strcpy(n_register.pwd, e_register->pwd);
+
+    control_dialog(idx, evt, &data, sizeof(n_register_t));
+    
+    /* call back to UI */
+    if (dlg[idx].step == DLG_STEP_FINISH)
+    {
+
+        if (dlg[idx].result == DLG_RES_ACK)
+        {
+            nty = dlg[idx].ack;
+            n_register_res = nty->nty;
+            //e_register_result(...);
+        }
+        else
+        {
+            //timeout or error
+        }
+    }
+}
+
+/* 待验证 */
+static void
+control_dialog(size_t idx, const req_srv_t evt, void **data, size_t len)
+{
+    int ret, opr_id;
+    
     opr_id = dlg[idx].opr;
-    e_debug("ctrl_eregister", "dealing new dla[%d], name [%d]",
+    e_debug("ctrl_eregister", "dealing new dlg[%d], name [%d]",
             opr_id, g_cmd_info[opr_id].name);
-
+    
     if (DLG_STEP_INIT == dlg[idx].step)
     {
         dlg[idx].beg = time(NULL);
         dlg[idx].step = DLG_STEP_RUN;
         dlg[idx].result = DLG_RES_IDLE;
+        e_debug(__func__, "new dlg[%d] has been initialized", idx);
+    }
 
-        e_debug("ctrl_elogin",
-                "new dlg[%d] for 'register' has been initialized", idx);
+    if (dlg[idx].step != DLG_STEP_RUN)
+    {
+        e_error(__func__, "dialog finish or not exist!");
+        return;
     }
     
+    if (DLG_RES_IDLE == dlg[idx].result)
+    {
+        e_debug(__func__, "the new dialog's data will be sent to netagent");
+        ret = send_net_agent(evt, *data, len);
+        if (ret != EME_OK)
+        {
+            dlg[idx].result = DLG_RES_TIMEOUT;
+            e_error(__func__, "send to netagent failed, error[%d]", ret);
+            dlg[idx].step = DLG_STEP_FINISH;
+        }
+        else
+        {
+            e_debug(__func__, "send to netagent success!");
+        }
+    }
+    else if (DLG_RES_ACK == dlg[idx].result) /* netagent ACK */
+    {
+        e_debug(__func__, "netagent ack, pending to return to UI");
+
+        dlg[idx].step = DLG_STEP_FINISH;
+    }
+    else if(DLG_RES_TIMEOUT == dlg[idx].result)
+    {
+        e_debug(__func__, "received netagent's result, timeout!");
+        dlg[idx].step = DLG_STEP_FINISH;
+    }
 }
 
 /**
@@ -248,7 +310,7 @@ void ctrl_elogin(size_t idx)
         e_debug("ctrl_elogin", "new dlg[%d] has been initialized", idx);
     }
     
-    /* 各层之间数据的交换 */
+        /* 各层之间数据的交换 */
     if (dlg[idx].step == DLG_STEP_RUN)
     {
         req = dlg[idx].req;
