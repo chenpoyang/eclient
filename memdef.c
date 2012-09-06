@@ -34,7 +34,9 @@ void agent_free(void *ptr)
     agent_t *agt = (agent_t *)ptr;
 
     free(agt->name);
+    agt->name = NULL;
     free(agt);
+    agt = NULL;
 }
 
 int agent_cmp(void *ptr, void *key)

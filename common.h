@@ -7,6 +7,7 @@
 /* 逻辑线程的id */
 #define CTRL_AGENT_ID   1
 #define NET_AGENT_ID    2
+#define MAX_AGENT_NUM   32
 
 /* ctrlagent层的事件类型 */
 #define CTRL_REQ_EVT    1
