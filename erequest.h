@@ -5,12 +5,19 @@
 
 typedef enum {
     CMD_LOGIN,
+    CMD_REGISTER
 } enum_ctrl_t;
 
 typedef struct _e_login_t {
     char usr[E_MINLINE];
     char pwd[E_MINLINE];
 } e_login_t;
+
+typedef struct _e_register_t 
+{
+    char usr[E_MINLINE];
+    char pwd[E_MINLINE];
+} e_register_t;
 
 typedef struct _ctrl_req_t {
     int cmd;
@@ -23,5 +30,6 @@ typedef struct _ctrl_notify_t {
 } ctrl_notify_t;
 
 int e_login(const char *usr, const char *pwd);
+int e_register(const char *usr, const char *pwd);
 
 #endif /* _EREQUEST_H_ */

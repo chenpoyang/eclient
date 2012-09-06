@@ -16,7 +16,8 @@ dlg_t dlg[MAX_DLG_BUF];
 /* 业务逻辑处理入口 */
 static cmd_info_t g_cmd_info[] = 
 {
-    {CMD_LOGIN, "e_login", ctrl_elogin}
+    {CMD_LOGIN, "e_login", ctrl_elogin}, 
+    {CMD_REGISTER, "e_register", ctrl_eregister}
 };
 
 static void deal_notify_evt(void *base, size_t len);
@@ -194,11 +195,42 @@ void deal_dialog(int idx)
  * @param    idx 标识此次请求的会话id
  * @return   void
  */
+void ctrl_eregister(size_t idx)
+{
+    int opr_id, ret;
+    e_register_t *e_register = NULL; /* UI层请求的数据结构 */
+    n_register_t n_register; /* 将准备发送到netagent的数据结构 */
+    n_register_res_t *n_register_res = NULL; /* 请求最终返回的结果 */
+    ctrl_req_t *req = NULL; /* 指向请求的结构, 类型不确定, 方便获取原请求的数据 */
+    net_notify_t *nty = NULL; /* 最终返回到netagent的回应数据, 类型未知 */
+
+    opr_id = dlg[idx].opr;
+    e_debug("ctrl_eregister", "dealing new dla[%d], name [%d]",
+            opr_id, g_cmd_info[opr_id].name);
+
+    if (DLG_STEP_INIT == dlg[idx].step)
+    {
+        dlg[idx].beg = time(NULL);
+        dlg[idx].step = DLG_STEP_RUN;
+        dlg[idx].result = DLG_RES_IDLE;
+
+        e_debug("ctrl_elogin",
+                "new dlg[%d] for 'register' has been initialized", idx);
+    }
+    
+}
+
+/**
+ * @brief    请求登陆的逻辑处理入口
+ *
+ * @param    idx 标识此次请求的会话id
+ * @return   void
+ */
 void ctrl_elogin(size_t idx)
 {
     int opr_id, ret;
-    n_login_t n_login;
     e_login_t *e_login = NULL;
+    n_login_t n_login;
     n_login_res_t *n_login_res = NULL;
     ctrl_req_t *req = NULL;
     net_notify_t *nty = NULL;
@@ -213,7 +245,7 @@ void ctrl_elogin(size_t idx)
         dlg[idx].step = DLG_STEP_RUN;
         dlg[idx].result = DLG_RES_IDLE;
 
-        e_debug("ctrl_elogin", "new dlg[%d] has been initilalized", idx);
+        e_debug("ctrl_elogin", "new dlg[%d] has been initialized", idx);
     }
     
     /* 各层之间数据的交换 */

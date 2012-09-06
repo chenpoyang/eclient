@@ -22,10 +22,24 @@ typedef struct _n_login_t
     eclient_listener listener;
 } n_login_t;
 
+typedef struct _n_register_t
+{
+    /* dialog mark */
+    int idx;
+    char usr[E_MINLINE];
+    char pwd[E_MINLINE];
+    eclient_listener listener;
+} n_register_t;
+
 typedef struct _n_login_res_t
 {
     int result;
 } n_login_res_t;
+
+typedef struct _n_register_res_t
+{
+    int result;
+} n_register_res_t;
 
 typedef struct _net_req_t {
     int cmd;
