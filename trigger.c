@@ -37,6 +37,10 @@ void *trigger_daemon(void *arg)
     start = 1;
     while (start)
     {
+        /* 1):从队列里取出一个请求, 通过信号灯同步, 并释放锁, 以便其他生产者添回请求
+         * 2):agent忙碌处理优先级最的请求
+         * note:可能阻塞于等待信号灯, 无法退出 */
+        
         pthread_mutex_lock(&agt->mtx);
 
         if (agt->status == AGENT_WAIT)
