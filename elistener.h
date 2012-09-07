@@ -1,4 +1,4 @@
-/* negagent层的回调 */
+/* negagent层各种请求的的回调, 实质上分别添加一监听器, 监听来自服务端的回复 */
 #ifndef _ELISTENER_H_
 #define _ELISTENER_H_
 

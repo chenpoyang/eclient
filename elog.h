@@ -1,3 +1,4 @@
+/* 客户端运行过程中的log输出方式, 某种程度上方便调试 */
 #ifndef _ELOG_H_
 #define _ELOG_H_
 

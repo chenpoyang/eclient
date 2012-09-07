@@ -1,3 +1,5 @@
+/* ctrlagent层守望护线程, 用于处理所有ctrlagent层队列里的请求, 包括业务逻辑处理,
+ * 入口为agent中的handler(const int , void *, size_t, from, to) */
 #ifndef _TRIGGER_H_
 #define _TRIGGER_H_
 

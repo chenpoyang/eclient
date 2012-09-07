@@ -1,3 +1,4 @@
+/* 网络通信层的请求及回调的数据结构, 及相应逻辑处理函数的定义 */
 #ifndef _NETREQ_H_
 #define _NETREQ_H_
 

@@ -1,3 +1,4 @@
+/* 某种数据结构内存的管理方式 */
 #ifndef _MEMDEF_H_
 #define _MEMDEF_H_
 

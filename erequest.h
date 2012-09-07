@@ -1,3 +1,5 @@
+/* UI层请求的入口, 如e_login_t和e_register_t都用ctrl_req_t包装,
+ * 统一发送到ctrlagent层处理 */
 #ifndef _EREQUEST_H_
 #define _EREQUEST_H_
 

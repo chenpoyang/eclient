@@ -1,3 +1,4 @@
+/* 网络通信的相关细节, IO复用处理, 与服务端连接的信息,  传输层细节, 如:TCP */
 #ifndef _CONN_H_
 #define _CONN_H_
 

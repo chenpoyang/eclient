@@ -1,3 +1,4 @@
+/* 消息接收模块 */
 #ifndef _RECVER_H_
 #define _RECVER_H_
 

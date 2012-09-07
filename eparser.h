@@ -1,3 +1,4 @@
+/* 协议解析模块 */
 #ifndef _E_PARSER_H_
 #define _E_PARSER_H_
 
