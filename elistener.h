@@ -6,6 +6,7 @@
 #include "netreq.h"
 
 extern n_login_t *login_arg;
+extern n_register_t *reg_arg;
 
 void add_listener(const req_srv_t , void *, eclient_listener);
 void login_listener(void *base, size_t len);

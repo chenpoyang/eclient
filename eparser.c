@@ -24,7 +24,12 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
     int idx, flg = EME_OK;
     conn_t *con = NULL;
     
-    con = get_connection();    
+    con = get_connection();
+    if (get_state(con) != CONNECTED)
+    {
+        e_error("e_compress", "please connect first!");
+    }
+    
     switch (sv_type)
     {
         /* 登陆协议范例: "1 username password" */
@@ -34,11 +39,6 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             idx = rand() % 2;
             snprintf(ret, len, "%d %s %s", idx, login->usr, login->pwd);
 
-            if (get_state(con) != CONNECTED)
-            {
-                e_error("e_compress", "please connect first!");
-            }
-            
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
@@ -48,6 +48,12 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             break;
 
         case SV_REGISTER:
+            if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
+            {
+                e_error("e_compress", "can not send data");
+                flg = EME_ERR;
+            }
+
             break;
 
         default:
@@ -63,10 +69,12 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
  * @param  len 接收到的消息长度
  * @return void
  */
-/* 考虑添回接收到的数据交给协议解析模块，解析完后再交给监听器, 再到netagent层, 即防止接收模块和negagent层的阻赛 */
+/* 考虑添回接收到的数据交给协议解析模块，解析完后再交给监听器,
+   再到netagent层, 即防止接收模块和negagent层的阻赛 */
 void e_decompress(const char *buf, size_t len)
 {
     n_login_res_t *login = NULL;
+    n_register_res_t *reg = NULL;
     int flg_ok = 0;
 
     e_debug("e_decompress", "received new data from server[%s]", buf);
@@ -80,7 +88,18 @@ void e_decompress(const char *buf, size_t len)
 
         flg_ok = 1;
         login_arg->listener(login, sizeof(n_login_res_t));
+        
         e_debug("e_decompress", "decompress success, login callback!");
+    }
+    else if (strstr(buf, "reg_user") != NULL && strstr(buf, "reg_pwd") != NULL)
+    {
+        reg = malloc(sizeof(n_register_res_t)); /* 由dlg[idx].ack管理内存 */
+        reg->result = EME_OK;
+
+        flg_ok = 1;
+        reg_arg->listener(reg, sizeof(n_register_res_t)); /* core dump */
+        
+        e_debug(__func__, "decompress success, register callback!");
     }
 
     if (flg_ok)

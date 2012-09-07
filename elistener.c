@@ -4,6 +4,7 @@
 #include "netreq.h"
 
 n_login_t *login_arg = NULL;
+n_register_t *reg_arg = NULL;
 
 /**
  * @brief  为args结构的请求(如n_login_t)添加回调监听,当服务端的响应时调用
@@ -20,9 +21,15 @@ add_listener(const req_srv_t tp, void *args, eclient_listener listener)
         case SV_LOGIN:
             login_arg = (n_login_t*)args;
             login_arg->listener = listener;
-            e_debug("reg_listener",
-                    "event[%s] has registered listener", "SV_LOGIN");
+            e_debug("reg_listener", "event[%s] has added listener", "SV_LOGIN");
             break;
+            
+        case SV_REGISTER:
+            reg_arg = (n_register_t*)args;
+            reg_arg->listener = listener;
+            e_debug(__func__, "event[%s] has added listener", "SV_REGISTER");
+            break;
+            
         default:
             break;
     }
@@ -36,7 +43,13 @@ add_listener(const req_srv_t tp, void *args, eclient_listener listener)
  *//* TODO 准备发送解析后的数据结构到netagent */
 void register_listener(void *base, size_t len)
 {
-    return;
+    n_register_res_t *reg = NULL;
+
+    reg = (n_register_res_t *)base;
+
+    e_debug("reg_listener",
+            "register received data from server,result[%d]", reg->result);
+    e_debug("mydebug\t", "---------------function called----------------");
 }
 
 /**
