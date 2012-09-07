@@ -73,7 +73,7 @@ void net_elogin(const req_srv_t sv_type, const n_login_t *login)
     e_debug("net_login", "[%s] is pending to be sent", str);
 
     /* 注册登请求的监听器, 以便接收服务端响应的信息 */
-    register_listener(sv_type, (void*)login, login_listener);
+    add_listener(sv_type, (void*)login, login_listener);
     
     e_debug("net_elogin", "add a new listener!");
 
@@ -95,7 +95,7 @@ void net_eregister(const req_srv_t sv_type, const n_register_t *reg)
     e_debug(__func__, "[%s] is pending to be sent", str);
 
     /* 注册登请求的监听器, 以便接收服务端响应的信息 */
-    register_listener(sv_type, (void*)reg, register_listener);
+    add_listener(sv_type, (void*)reg, register_listener);
 
     e_debug(__func__, "add a new listener!");
 

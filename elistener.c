@@ -13,7 +13,7 @@ n_login_t *login_arg = NULL;
  * @return void
  */
 void
-register_listener(const req_srv_t tp, void *args, eclient_listener listener)
+add_listener(const req_srv_t tp, void *args, eclient_listener listener)
 {
     switch (tp)
     {
