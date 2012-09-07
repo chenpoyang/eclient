@@ -17,13 +17,14 @@
  * @param  ret     将基址为base, 长度为len的数据解析并用ret返回给调用者
  * @param  len     缓冲区长度
  * @return int, EME_OK or EME_ERR, 压缩成功或失败
-nnnn */
+ */
 int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
 {
     n_login_t *login = NULL;
     int idx, flg = EME_OK;
     conn_t *con = NULL;
     
+    con = get_connection();    
     switch (sv_type)
     {
         /* 登陆协议范例: "1 username password" */
@@ -32,7 +33,6 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             srand(time(NULL));
             idx = rand() % 2;
             snprintf(ret, len, "%d %s %s", idx, login->usr, login->pwd);
-            con = get_connection();
 
             if (get_state(con) != CONNECTED)
             {
@@ -45,6 +45,9 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
                 flg = EME_ERR;
             }
 
+            break;
+
+        case SV_REGISTER:
             break;
 
         default:

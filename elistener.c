@@ -34,6 +34,17 @@ register_listener(const req_srv_t tp, void *args, eclient_listener listener)
  * @param  len  信息的长度
  * @return void
  *//* TODO 准备发送解析后的数据结构到netagent */
+void register_listener(void *base, size_t len)
+{
+    return;
+}
+
+/**
+ * @brief  当从网络接收到字节流后, 结过协议解析后获取相应的信息
+ * @param  base 协议解析后的信息位置
+ * @param  len  信息的长度
+ * @return void
+ *//* TODO 准备发送解析后的数据结构到netagent */
 void login_listener(void *base, size_t len)
 {
     n_login_res_t *login = NULL;

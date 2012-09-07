@@ -142,9 +142,13 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
         case SV_REGISTER:
             reg = (n_register_t *)base;
 
+            net_eregister(sv_type, reg);
+            
             e_debug(__func__,
                     "transfer to netagent success![%s][%s]",
                     reg->usr, reg->pwd);
+
+            idx = reg->idx;
         default:
             idx = -1;
             break;
