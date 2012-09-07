@@ -20,8 +20,9 @@ int main(int argc, const char *argv[])
     /* 初始化连接和初始化接收线程 */
     init_net_state("127.0.0.1", 8888);
 
-    e_debug("emain\t", "request for login from erequest");
-//    e_login("eemeeuser", "eemeepwd");
+    e_debug("emain\t", "user's new request from erequest");
+
+    e_login("eemeeuser", "eemeepwd");
     e_register("reg_user", "reg_pwd");
 
     thread_wait(5);/* 确保e_login()成功回调到用户 */

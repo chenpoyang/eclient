@@ -11,7 +11,8 @@ typedef enum {
 
 /* netagent 层收到服务端回复事件类型 */
 typedef enum {
-    EV_LOGIN
+    EV_LOGIN,
+    EV_REGISTER
 } nty_evt_t;
 
 typedef struct _n_login_t 

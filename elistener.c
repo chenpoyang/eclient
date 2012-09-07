@@ -49,7 +49,9 @@ void register_listener(void *base, size_t len)
 
     e_debug("reg_listener",
             "register received data from server,result[%d]", reg->result);
-    e_debug("mydebug\t", "---------------function called----------------");
+    e_debug(__func__, "---------------function called----------------");
+
+    send_net_notify(reg_arg->idx, EV_REGISTER, reg, sizeof(n_register_res_t));
 }
 
 /**
@@ -67,6 +69,5 @@ void login_listener(void *base, size_t len)
     e_debug("login_listener", "n_login_res[%d], dlg id[%d]",
             login->result, login_arg->idx);
 
-    send_net_notify(login_arg->idx, EV_LOGIN,
-                    login, sizeof(n_login_res_t));
+    send_net_notify(login_arg->idx, EV_LOGIN, login, sizeof(n_login_res_t));
 }

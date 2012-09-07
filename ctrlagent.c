@@ -407,7 +407,7 @@ static void clear_dialog(int idx)
         }
     }
 
-    if (dlg[idx].net_req->req != NULL)
+    if (dlg[idx].net_req->req != NULL) /* core dump [2012-09-07 14:14:57] */
     {
         free(dlg[idx].net_req->req);
         dlg[idx].net_req = NULL;

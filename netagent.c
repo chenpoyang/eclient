@@ -46,6 +46,7 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
 {
     net_notify_t *nty = NULL;
     n_login_res_t *login_res = NULL;
+    n_register_res_t *reg_res = NULL;
     int idx = -1;/* 会话id, 用于标识请求, 控制请求的生命周期, 清理资源等 */
 
     nty = (net_notify_t *)base;
@@ -66,6 +67,14 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
                     "EV_LOGIN", login_res->result);
             
             break;
+        case EV_REGISTER:
+            reg_res = nty->nty;
+
+            e_debug(__func__,
+                    "transfered from server success, type[%s] result[%d]",
+                    "EV_REGISTER", reg_res->result);
+            break;
+            
         default:
             e_error("deal_net_data", "unknown data type!");
             
