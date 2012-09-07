@@ -57,5 +57,6 @@ typedef struct _net_notify_t {
 int send_net_agent(const req_srv_t sv_type, void *base, size_t len);
 int send_net_notify(const int, const nty_evt_t, void *, size_t);
 void net_elogin(const req_srv_t sv_type, const n_login_t *login);
+void net_eregister(const req_srv_t sv_type, const n_register_t *reg);
 
 #endif /* _NETREQ_H_ */

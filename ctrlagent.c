@@ -206,10 +206,12 @@ void ctrl_eregister(size_t idx)
     req_srv_t evt = SV_REGISTER;
     void *data;
 
+    req = dlg[idx].req;
     e_register = (e_register_t*)req->req;
     n_register.idx = idx;
     strcpy(n_register.usr, e_register->usr);
     strcpy(n_register.pwd, e_register->pwd);
+    data = &n_register;
 
     control_dialog(idx, evt, &data, sizeof(n_register_t));
     
@@ -221,11 +223,13 @@ void ctrl_eregister(size_t idx)
         {
             nty = dlg[idx].ack;
             n_register_res = nty->nty;
-            //e_register_result(...);
+            e_register_result(n_register_res->result);
+            e_debug(__func__, "dialog ack!");
         }
         else
         {
-            //timeout or error
+            e_register_result(n_register_res->result);
+            e_debug(__func__, "dialog timeout!");
         }
     }
 }
@@ -237,7 +241,7 @@ control_dialog(size_t idx, const req_srv_t evt, void **data, size_t len)
     int ret, opr_id;
     
     opr_id = dlg[idx].opr;
-    e_debug("ctrl_eregister", "dealing new dlg[%d], name [%d]",
+    e_debug("ctrl_eregister", "dealing new dlg[%d], name [%s]",
             opr_id, g_cmd_info[opr_id].name);
     
     if (DLG_STEP_INIT == dlg[idx].step)

@@ -123,7 +123,8 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
     int idx = -1;
     
     n_login_t *login = NULL;
-
+    n_register_t *reg = NULL;
+    
     switch (sv_type)
     {
         case SV_LOGIN:
@@ -138,6 +139,12 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
             idx = login->idx;
             
             break;
+        case SV_REGISTER:
+            reg = (n_register_t *)base;
+
+            e_debug(__func__,
+                    "transfer to netagent success![%s][%s]",
+                    reg->usr, reg->pwd);
         default:
             idx = -1;
             break;

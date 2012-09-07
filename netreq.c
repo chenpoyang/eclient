@@ -79,3 +79,14 @@ void net_elogin(const req_srv_t sv_type, const n_login_t *login)
 
     e_compress(sv_type, login, str, sizeof(str));
 }
+
+/**
+ * @brief  向服务端请求的业务逻辑之一, 请求注册
+ * @param  sv_type 请求类型
+ * @param  reg     请求的数据
+ * @return void
+ */
+void net_eregister(const req_srv_t sv_type, const n_register_t *reg)
+{
+    return;
+}
