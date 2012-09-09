@@ -45,11 +45,15 @@ void *trigger_daemon(void *arg)
 
         if (agt->status == AGENT_WAIT)
         {
+            /* 防止条件欺骗, 条件为:有请求需处理, 所以需对agt->status进行验证
+               陷阱:此处阻赛, 退出问题与业务无关地调用send_signal()作退出 */
             pthread_cond_wait(&agt->cnd, &agt->mtx);
+            /* 从队列中拿出一个无素并处理, 注意同步 */
             if (agt->status == AGENT_RUN)
             {
                 /* 调用相应逻辑层的入口函数 */
                 agt->handler(agt->event, agt->userdata, agt->len, agt->cmd);
+                    /* 如果消息队列为空, 则agent需等待, 否则不断取队列元素并处理 */
                 agt->status = AGENT_WAIT;
             }
             else if (agt->status == AGENT_EXIT)
@@ -120,8 +124,16 @@ int send_signal(int evt, void *base, size_t len, int from, int recver)
     /* run agent_t(protect agent_t) */
     agt_ptr = (agent_t *)(nod->value);
 
+    /* 工作线程已拿到锁或在等待处理信号
+       1.工作线程没在等待条件变量, 向队列中添加元素, 不可能死锁
+       2.工作线程已拿到锁, 向消息队列中添加请求, 需拿到队列锁:
+       a):agent拿到agent锁和队列锁, 用户想拿队列锁, 用户需等待, 但用户等待时间极小,
+       agent只有在运行过程中才会拿队列锁进行取元素, 且取元素时间复杂度为O(1) */
+
     pthread_mutex_lock(&agt_ptr->mtx);
 
+    /* 当前队列长度为1, 相当于从队取一个元素并处理,
+       将改进为在各自守护线程中取元素, 此处只向各自处理缓冲区添加元素, 注意同步 */
     agt_ptr->len = len;
     agt_ptr->event = evt;
     agt_ptr->userdata = s_base;
@@ -178,7 +190,7 @@ void init_agent(int id, const char *name, agent_handler handler)
         pthread_attr_setdetachstate(&_thrd_attr, PTHREAD_CREATE_JOINABLE);
     }
 
-    if (msg_que == NULL)
+    if (msg_que == NULL) /* 初始化所有事件队列 */
     {
         msg_que = list_create();
         pthread_mutex_init(&_msg_que_mtx, NULL);
