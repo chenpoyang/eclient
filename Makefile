@@ -40,8 +40,8 @@ ALL_LIB     = $(LIBCORE) $(LIBECLIENT)
 # Targets start here
 all:	$(ALL_OBJ) $(ALL_LIB) $(ALL_T)
 
-emain:
-	$(CC) $(CFLAGS) -o $@ -L. -ltrigger -leclient -lpthread
+emain: $(CORE_OBJ) $(CLIENT_OBJ)
+	$(CC) $(CFLAGS) -o $@ -lpthread $^
 
 $(LIBCORE) : $(CORE_OBJ)
 	$(CC) -fPIC -shared -o $@ $^

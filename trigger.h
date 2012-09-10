@@ -33,8 +33,8 @@ typedef struct _agent_msg_t {
     int id; /* send to "recver's queue" */
     int evt;
     size_t len;
-    void *data; /* just transmit, no need to free */
     agent_status_t status;
+    void *data; /* just transmit, no need to free */
 } agent_msg_t;
 
 void *trigger_daemon(void *arg);

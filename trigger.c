@@ -68,10 +68,29 @@ void *trigger_daemon(void *arg)
            获取node_t *nod, nod->data, 再删除队列结点 */
         pthread_mutex_lock(&_msg_que_mtx[id]);
 
+        /* agent的状态由队列里最后一个元素决定, 当最后一个元素出队列, 业务逻辑
+           处理结束后, agent的状态仍然是AGENT_RUN, 但此时下一次队列里已没请求,
+           所以导致'agt_msg = (agent_msg_t *)(nx_agt_msg->value);'产生
+           core dumped, 此时添加多一个断逻辑即可 */
+        if (list_length(_msg_que[id]) <= 0)
+        {
+            pthread_mutex_unlock(&_msg_que_mtx[id]);
+            agt->status = AGENT_WAIT;
+            pthread_mutex_unlock(&agt->mtx);
+            e_debug("trigger_daemon", "agent[%d]'s msg queue is empty", id);
+            continue;
+        }
+        
         nx_agt_msg = list_first(_msg_que[id]);
         /* get the data(agent_msg_t type) from list node */
-/* core dump [2012-09-09 23:38:27] */
-        agt_msg = (agent_msg_t *)nx_agt_msg->value;
+
+        agt_msg = (agent_msg_t *)(nx_agt_msg->value); /* core dump, why? */
+ 
+        if (agt_msg == NULL)
+        {
+            e_error("trigger_daemon", "agt_msg is NULL!");
+        }
+        
         data = agt_msg->data;
         evt = agt_msg->evt;
         len = agt_msg->len;
@@ -152,7 +171,8 @@ int send_signal(int evt, void *base, size_t len, int from, int recver)
     agent_t agt, *agt_ptr = NULL;
     agent_msg_t *agt_msg = NULL;
     void *s_base = NULL;
-    int id = recver, chk;
+    const int id = recver;
+    int chk;
 
     chk = check_agent_id(id);
     if (chk == EME_ERR)
@@ -173,6 +193,7 @@ int send_signal(int evt, void *base, size_t len, int from, int recver)
     
     /* add msg to meg_que(protect list_t *msg_que, static int msg_id) */
     pthread_mutex_lock(&_msg_que_mtx[id]);
+    
     /* add agent msg to its' queue, pending to be dealt */
     agt_msg = (agent_msg_t *)malloc(sizeof(agent_msg_t));
     agt_msg->id = id;
@@ -182,6 +203,7 @@ int send_signal(int evt, void *base, size_t len, int from, int recver)
     agt_msg->status = AGENT_RUN;
     agt_msg->data = s_base;
     list_add_node_tail(_msg_que[id], agt_msg);
+
     pthread_mutex_unlock(&_msg_que_mtx[id]);
 
     /* get agent_t(protect agent_t) */
@@ -252,9 +274,15 @@ void init_agent(int id, const char *name, agent_handler handler)
 
     if (NULL == _msg_que[0]) /* 初始化所有事件队列 */
     {
+        e_debug("init_agent", "all agent msg queue has been initialized!");
         for (i = 0; i < MAX_AGENT_NUM; ++i)
         {
             _msg_que[i] = list_create();
+            if (_msg_que[i] == NULL)
+            {
+                e_error("init_agent",
+                        "initialize agent msg queue[%d] failed!", i);
+            }
             pthread_mutex_init(&_msg_que_mtx[i], NULL);
         }
     }

@@ -169,7 +169,6 @@ list_t *list_insert_node(list_t *lst, node_t *old_node, void *value, int after)
     return lst;
 }
 
-
 /**
  * @brief   从列表中删除结点nod, 并根据不同的结点类型释放内存
  *
