@@ -71,6 +71,7 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
  */
 /* 考虑添回接收到的数据交给协议解析模块，解析完后再交给监听器,
    再到netagent层, 即防止接收模块和negagent层的阻赛 */
+/* 网络IO与协议解析处于同一线程, 协议解析可能阻碍网络IO */
 void e_decompress(const char *buf, size_t len)
 {
     n_login_res_t *login = NULL;

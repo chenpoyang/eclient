@@ -28,7 +28,7 @@ ALL_T		= emain
 CORE_OBJ    = trigger.o elog.o memdef.o list.o
 
 CLIENT_OBJ	= emain.o conn.o ctrlagent.o ctrlhandler.o eevent.o elistener.o \
-			  eparser.o erequest.o netagent.o netreq.o recver.o sender.o
+			  eparser.o erequest.o netagent.o netreq.o recver.o sender.o jsonpro.o
 
 ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ)
 
@@ -85,3 +85,4 @@ recver.o: recver.c erequest.h common.h elog.h trigger.h memdef.h list.h \
  eparser.h netreq.h recver.h conn.h
 sender.o: sender.c sender.h conn.h elog.h common.h
 trigger.o: trigger.c common.h elog.h trigger.h memdef.h list.h
+jsonpro.o: jsonpro.c jsonpro.h
