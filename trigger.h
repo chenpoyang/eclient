@@ -9,6 +9,7 @@
 #include "memdef.h"
 #include "list.h"
 
+#define MAX_AGENT_NUM 32
 #define AGENT_THREAD_DEFAULT_WAIT 1
 
 typedef void (*agent_handler)(int, void *, size_t, int);
@@ -26,6 +27,15 @@ typedef struct _agent_t {
     size_t len;
     int cmd;
 } agent_t;
+
+/* agent msg */
+typedef struct _agent_msg_t {
+    int id; /* send to "recver's queue" */
+    int evt;
+    size_t len;
+    void *data; /* just transmit, no need to free */
+    agent_status_t status;
+} agent_msg_t;
 
 void *trigger_daemon(void *arg);
 void init_agent(int id, const char *name, agent_handler);

@@ -13,12 +13,14 @@ static list_t *agent_lst = NULL;
 static pthread_mutex_t _lst_mtx;
 static pthread_attr_t _thrd_attr;
 
+
 /* 消息队列 */
-static list_t *msg_que = NULL;
-static pthread_mutex_t _msg_que_mtx;
+static list_t *_msg_que[MAX_AGENT_NUM];
+static pthread_mutex_t _msg_que_mtx[MAX_AGENT_NUM];
 
 static void * 
 transfer_data(const int evt, void *base, size_t len, int from, int to);
+static int check_agent_id(const int id);
 
 /**
  * @brief   各层的守护线程
@@ -29,12 +31,18 @@ transfer_data(const int evt, void *base, size_t len, int from, int to);
  */
 void *trigger_daemon(void *arg)
 {
-    int start;
+    int start, id, evt, flg_que_empty = 1;
     agent_t *agt = (agent_t*)arg;
+    agent_status_t status;
+    agent_msg_t *agt_msg = NULL;
+    node_t *nx_agt_msg = NULL;
+    void *data = NULL;
+    size_t len;
 
     e_debug("trigger_daemon", "new trigger thread start!");
     
     start = 1;
+    id = agt->id;
     while (start)
     {
         /* 1):从队列里取出一个请求, 通过信号灯同步, 并释放锁, 以便其他生产者添回请求
@@ -48,20 +56,45 @@ void *trigger_daemon(void *arg)
             /* 防止条件欺骗, 条件为:有请求需处理, 所以需对agt->status进行验证
                陷阱:此处阻赛, 退出问题与业务无关地调用send_signal()作退出 */
             pthread_cond_wait(&agt->cnd, &agt->mtx);
-            /* 从队列中拿出一个无素并处理, 注意同步 */
-            if (agt->status == AGENT_RUN)
+            /* must break, instead of changing the value of start,
+               see 'stop_agent(...)' */
+            if (AGENT_EXIT == agt->status)
             {
-                /* 调用相应逻辑层的入口函数 */
-                agt->handler(agt->event, agt->userdata, agt->len, agt->cmd);
-                    /* 如果消息队列为空, 则agent需等待, 否则不断取队列元素并处理 */
-                agt->status = AGENT_WAIT;
+                break;
             }
-            else if (agt->status == AGENT_EXIT)
-            {
-                start = 0;
-                pthread_cond_destroy(&agt->cnd);
-                pthread_mutex_destroy(&agt->mtx);
-            }
+        }
+        
+        /* 从队列头取一元素, 删除结点, 但结点的数据不能删除(释放资源),
+           获取node_t *nod, nod->data, 再删除队列结点 */
+        pthread_mutex_lock(&_msg_que_mtx[id]);
+
+        nx_agt_msg = list_first(_msg_que[id]);
+        /* get the data(agent_msg_t type) from list node */
+/* core dump [2012-09-09 23:38:27] */
+        agt_msg = (agent_msg_t *)nx_agt_msg->value;
+        data = agt_msg->data;
+        evt = agt_msg->evt;
+        len = agt_msg->len;
+        status = agt_msg->status;
+        /* pop an element */
+        list_del_node(_msg_que[id], nx_agt_msg);
+        flg_que_empty = list_length(_msg_que[id]) >= 0 ? 0 : 1;
+
+        pthread_mutex_unlock(&_msg_que_mtx[id]);
+
+        /* set agent's value */
+        agt->status = status;
+        agt->event = evt;
+        agt->len = len;
+        agt->userdata = data;
+        
+        /* 从队列中拿出一个无素并处理, 注意同步 */
+        if (agt->status == AGENT_RUN)
+        {
+            /* 调用相应逻辑层的入口函数 */
+            agt->handler(agt->event, agt->userdata, agt->len, agt->cmd);
+            /* 如果消息队列为空, 则agent需等待, 否则不断取队列元素并处理 */
+            agt->status = flg_que_empty ? AGENT_WAIT : AGENT_RUN;
         }
 
         pthread_mutex_unlock(&agt->mtx);
@@ -89,6 +122,20 @@ transfer_data(const int evt, void *base, size_t len, int from, int to)
     return s_base;
 }
 
+/* 检查agent是否合法 */
+static int check_agent_id(const int id)
+{
+    int legal = 0;
+
+    legal = id >= 0 && id < MAX_AGENT_NUM;
+    if (!legal)
+    {
+        e_error("check_agent", "illegal agent id");
+    }
+
+    return legal ? EME_OK : EME_ERR;
+}
+
 /**
  * @brief   evt事件来临, 向线程recver发送消息
  *
@@ -102,9 +149,17 @@ transfer_data(const int evt, void *base, size_t len, int from, int to)
 int send_signal(int evt, void *base, size_t len, int from, int recver)
 {
     node_t *nod = NULL;
-    agent_t agt, *agt_ptr;
+    agent_t agt, *agt_ptr = NULL;
+    agent_msg_t *agt_msg = NULL;
     void *s_base = NULL;
+    int id = recver, chk;
 
+    chk = check_agent_id(id);
+    if (chk == EME_ERR)
+    {
+        return chk;
+    }
+    
     agt.id = recver;
     nod = list_search_key(agent_lst, &agt);
     if (NULL == nod)
@@ -112,16 +167,24 @@ int send_signal(int evt, void *base, size_t len, int from, int recver)
         e_error("send_signal", "no daemon thread %d!", agt.id);
         return -1;
     }
-
-    /* add msg to meg_que(protect list_t *msg_que, static int msg_id) */
-    pthread_mutex_lock(&_msg_que_mtx);
-
-    pthread_mutex_unlock(&_msg_que_mtx);
-
-    /* 接收信息, 转移到另处一层 */
+    
+    /* transmit data to 'recver agent' from 'from agent' */
     s_base = transfer_data(evt, base, len, from, recver);
+    
+    /* add msg to meg_que(protect list_t *msg_que, static int msg_id) */
+    pthread_mutex_lock(&_msg_que_mtx[id]);
+    /* add agent msg to its' queue, pending to be dealt */
+    agt_msg = (agent_msg_t *)malloc(sizeof(agent_msg_t));
+    agt_msg->id = id;
+    agt_msg->evt = evt;
+    agt_msg->len = len;
+    /* for dealing this agent msg, the agent status must be set to AGENT_RUN */
+    agt_msg->status = AGENT_RUN;
+    agt_msg->data = s_base;
+    list_add_node_tail(_msg_que[id], agt_msg);
+    pthread_mutex_unlock(&_msg_que_mtx[id]);
 
-    /* run agent_t(protect agent_t) */
+    /* get agent_t(protect agent_t) */
     agt_ptr = (agent_t *)(nod->value);
 
     /* 工作线程已拿到锁或在等待处理信号
@@ -130,17 +193,13 @@ int send_signal(int evt, void *base, size_t len, int from, int recver)
        a):agent拿到agent锁和队列锁, 用户想拿队列锁, 用户需等待, 但用户等待时间极小,
        agent只有在运行过程中才会拿队列锁进行取元素, 且取元素时间复杂度为O(1) */
 
-    pthread_mutex_lock(&agt_ptr->mtx);
-
-    /* 当前队列长度为1, 相当于从队取一个元素并处理,
-       将改进为在各自守护线程中取元素, 此处只向各自处理缓冲区添加元素, 注意同步 */
-    agt_ptr->len = len;
-    agt_ptr->event = evt;
-    agt_ptr->userdata = s_base;
-    agt_ptr->status = AGENT_RUN;
-    pthread_cond_signal(&agt_ptr->cnd);
-
-    pthread_mutex_unlock(&agt_ptr->mtx);
+    /* the agent's queue has at least one agent msg, wake it up or do nothing */
+    if (agt_ptr->status != AGENT_RUN)
+    {
+        pthread_mutex_lock(&agt_ptr->mtx);
+        pthread_cond_signal(&agt_ptr->cnd);
+        pthread_mutex_unlock(&agt_ptr->mtx);
+    }
 
     return EME_OK;
 }
@@ -178,6 +237,7 @@ void stop_agent(int id, list_t *agt_lst)
 void init_agent(int id, const char *name, agent_handler handler)
 {
     agent_t *agt;
+    int i;
 
     if (agent_lst == NULL)
     {
@@ -190,10 +250,13 @@ void init_agent(int id, const char *name, agent_handler handler)
         pthread_attr_setdetachstate(&_thrd_attr, PTHREAD_CREATE_JOINABLE);
     }
 
-    if (msg_que == NULL) /* 初始化所有事件队列 */
+    if (NULL == _msg_que[0]) /* 初始化所有事件队列 */
     {
-        msg_que = list_create();
-        pthread_mutex_init(&_msg_que_mtx, NULL);
+        for (i = 0; i < MAX_AGENT_NUM; ++i)
+        {
+            _msg_que[i] = list_create();
+            pthread_mutex_init(&_msg_que_mtx[i], NULL);
+        }
     }
 
     agt = (agent_t *)calloc(1, sizeof(agent_t));
@@ -224,6 +287,7 @@ void stop_all_agent()
     list_iter_t *it = NULL;
     node_t *cur = NULL;
     agent_t *agt = NULL;
+    int i;
     
     it = list_get_iterator(agent_lst, LIST_START_HEAD);
     while ((cur = list_next(it)) != NULL)
@@ -233,9 +297,15 @@ void stop_all_agent()
         pthread_join(agt->thrd, NULL);
     }
     list_release_iterator(it);
+    it = NULL;
 
     list_release(agent_lst);
-    list_release(msg_que);
+    for (i = 0; i < MAX_AGENT_NUM; ++i)
+    {
+        list_release(_msg_que[i]);
+        _msg_que[i] = NULL;
+        pthread_mutex_destroy(&_msg_que_mtx[i]);
+    }
 }
 
 /**

@@ -203,6 +203,7 @@ list_t *list_del_node(list_t *lst, node_t *nod)
         lst->lfree(nod->value);
     }
     free(nod);
+    --lst->len;
 
     return lst;
 }
