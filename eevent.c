@@ -8,5 +8,5 @@ void e_login_result(int result)
 
 void e_register_result(int result)
 {
-    e_debug(__func__, "register result:[%d]", result);
+    e_debug("e_register_result", "register result:[%d]", result);
 }

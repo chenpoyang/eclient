@@ -224,12 +224,12 @@ void ctrl_eregister(size_t idx)
             nty = dlg[idx].ack;
             n_register_res = nty->nty;
             e_register_result(n_register_res->result);
-            e_debug(__func__, "dialog ack!");
+            e_debug("ctrl_eregister", "dialog ack!");
         }
         else
         {
             e_register_result(n_register_res->result);
-            e_debug(__func__, "dialog timeout!");
+            e_debug("ctrl_eregister", "timeout!");
         }
     }
 }
@@ -249,39 +249,39 @@ control_dialog(size_t idx, const req_srv_t evt, void **data, size_t len)
         dlg[idx].beg = time(NULL);
         dlg[idx].step = DLG_STEP_RUN;
         dlg[idx].result = DLG_RES_IDLE;
-        e_debug(__func__, "new dlg[%d] has been initialized", idx);
+        e_debug("control_dialog", "dlg[%d] has been initialized", idx);
     }
 
     if (dlg[idx].step != DLG_STEP_RUN)
     {
-        e_error(__func__, "dialog finish or not exist!");
+        e_error("control_dialog", "dialog finish or not exist!");
         return;
     }
     
     if (DLG_RES_IDLE == dlg[idx].result)
     {
-        e_debug(__func__, "the new dialog's data will be sent to netagent");
+        e_debug("control_dialog", "new dialog's data will be sent to netagent");
         ret = send_net_agent(evt, *data, len);
         if (ret != EME_OK)
         {
             dlg[idx].result = DLG_RES_TIMEOUT;
-            e_error(__func__, "send to netagent failed, error[%d]", ret);
+            e_error("control_dialog","send to netagent failed, error[%d]", ret);
             dlg[idx].step = DLG_STEP_FINISH;
         }
         else
         {
-            e_debug(__func__, "send to netagent success!");
+            e_debug("control_dialog", "send to netagent success!");
         }
     }
     else if (DLG_RES_ACK == dlg[idx].result) /* netagent ACK */
     {
-        e_debug(__func__, "netagent ack, pending to return to UI");
+        e_debug("control_dialog", "netagent ack, pending to return to UI");
 
         dlg[idx].step = DLG_STEP_FINISH;
     }
     else if(DLG_RES_TIMEOUT == dlg[idx].result)
     {
-        e_debug(__func__, "received netagent's result, timeout!");
+        e_debug("control_dialog", "received netagent's result, timeout!");
         dlg[idx].step = DLG_STEP_FINISH;
     }
 }
@@ -435,7 +435,6 @@ static void clear_dialog(int idx)
         e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "req");
     }
 
-    /* may by leak: ((type)ack)->(member) not free! */
     if (dlg[idx].ack->nty != NULL)
     {
         free(dlg[idx].ack->nty);
@@ -448,4 +447,6 @@ static void clear_dialog(int idx)
         dlg[idx].ack = NULL;
         e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "ack");
     }
+
+    dlg[idx].result = DLG_RES_IDLE;
 }

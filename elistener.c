@@ -27,7 +27,7 @@ add_listener(const req_srv_t tp, void *args, eclient_listener listener)
         case SV_REGISTER:
             reg_arg = (n_register_t*)args;
             reg_arg->listener = listener;
-            e_debug(__func__, "event[%s] has added listener", "SV_REGISTER");
+            e_debug("add_listener", "event[%s] has added listener", "SV_REGISTER");
             break;
             
         default:

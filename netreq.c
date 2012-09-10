@@ -92,12 +92,12 @@ void net_eregister(const req_srv_t sv_type, const n_register_t *reg)
 
     sprintf(str, "%s %s", reg->usr, reg->pwd);
 
-    e_debug(__func__, "[%s] is pending to be sent", str);
+    e_debug("net_eregister", "[%s] is pending to be sent", str);
 
     /* 注册登请求的监听器, 以便接收服务端响应的信息 */
     add_listener(sv_type, (void*)reg, register_listener);
 
-    e_debug(__func__, "add a new listener!");
+    e_debug("net_eregister", "add a new listener!");
 
     e_compress(sv_type, reg, str, sizeof(str));
 }

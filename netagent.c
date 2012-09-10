@@ -70,7 +70,7 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
         case EV_REGISTER:
             reg_res = nty->nty;
 
-            e_debug(__func__,
+            e_debug("deal_net_data",
                     "transfered from server success, type[%s] result[%d]",
                     "EV_REGISTER", reg_res->result);
             break;
@@ -153,7 +153,7 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
 
             net_eregister(sv_type, reg);
             
-            e_debug(__func__,
+            e_debug("deal_ctrl_net",
                     "transfer to netagent success![%s][%s]",
                     reg->usr, reg->pwd);
 

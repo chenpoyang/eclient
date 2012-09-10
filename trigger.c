@@ -134,7 +134,7 @@ transfer_data(const int evt, void *base, size_t len, int from, int to)
     s_base = malloc(len);
     /* 必加, 否则数据无法传递 */
     memcpy(s_base, base, len);
-    e_debug("store_data","trigger received data from[%d], "
+    e_debug("transfer_data","trigger received data from[%d], "
             "will transmit to[%d], size = [%d], event[%d]",
             from, to, len, evt);
 

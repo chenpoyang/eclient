@@ -99,7 +99,7 @@ void e_decompress(const char *buf, size_t len)
         flg_ok = 1;
         reg_arg->listener(reg, sizeof(n_register_res_t)); /* core dump */
         
-        e_debug(__func__, "decompress success, register callback!");
+        e_debug("e_decompress", "decompress success, register callback!");
     }
 
     if (flg_ok)
