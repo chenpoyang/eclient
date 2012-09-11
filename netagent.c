@@ -133,6 +133,7 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
     
     n_login_t *login = NULL;
     n_register_t *reg = NULL;
+    n_send_msg_t *n_snd = NULL;
     
     switch (sv_type)
     {
@@ -154,10 +155,21 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
             net_eregister(sv_type, reg);
             
             e_debug("deal_ctrl_net",
-                    "transfer to netagent success![%s][%s]",
+                    "transfer to netagent success, usr[%s], pwd[%s]",
                     reg->usr, reg->pwd);
 
             idx = reg->idx;
+        case SV_SEND_MSG:
+            n_snd = (n_send_msg_t *)base;
+
+            net_esnd_msg(sv_type, n_snd);
+
+            e_debug("deal_ctrl_net",
+                    "transfer to netagent success, type[%d], msg[%s], to[%s]",
+                    n_snd->type, n_snd->msg, n_snd->to);
+
+            idx = n_snd->idx;
+            
         default:
             idx = -1;
             break;

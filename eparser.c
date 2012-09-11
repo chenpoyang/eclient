@@ -22,8 +22,10 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
 {
     n_login_t *login = NULL;
     n_register_t *reg = NULL;
+    n_send_msg_t *n_snd = NULL;
     int flg = EME_OK;
     conn_t *con = NULL;
+    char eme_user[] = "eme_cpy";
     
     con = get_connection();
     if (get_state(con) != CONNECTED)
@@ -33,8 +35,8 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
     
     switch (sv_type)
     {
-            /* 登陆协议范例:
-               [{"action":"login","user":"weimade","passwd":"123456"}] */
+/* 登陆协议:
+[{"action":"login","user":"weimade","passwd":"123456"}] */
         case SV_LOGIN:
             login = (n_login_t *)base;
             snprintf(ret, len, "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
@@ -49,7 +51,8 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             }
 
             break;
-
+/* 注册协议:
+{"action":"reg","user":"weimade","passwd":"123456","repasswd":"123456"} */
         case SV_REGISTER:
             reg = (n_register_t *)base;
             snprintf(ret, len,
@@ -64,9 +67,25 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
             }
-
+            
             break;
-
+/* 发消息协议:
+{"action":"sendmsg","msg":"xxxeeeee","to":"b@icross.com","from":"a@icross.com"} */
+        case SV_SEND_MSG:
+            n_snd = (n_send_msg_t *)base;
+            snprintf(ret, len,
+            "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
+                     "action", "sendmsg",
+                     "msg", n_snd->msg,
+                     "to", n_snd->to,
+                     "from", eme_user); /* TODO 考虑可设成全局用户 */
+            
+            if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
+            {
+                e_error("e_compress", "can not send data");
+                flg = EME_ERR;
+            }
+            
         default:
             break;
     }

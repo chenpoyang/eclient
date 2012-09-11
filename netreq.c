@@ -90,13 +90,24 @@ void net_eregister(const req_srv_t sv_type, const n_register_t *reg)
 {
     char str[E_MAXLINE] = "";
 
-
-    e_debug("net_eregister", "[%s] is pending to be sent", str);
-
-    /* 注册登请求的监听器, 以便接收服务端响应的信息 */
+    /* 注册登陆请求的监听器, 以便接收服务端响应的信息 */
     add_listener(sv_type, (void*)reg, register_listener);
 
     e_debug("net_eregister", "add a new listener!");
 
     e_compress(sv_type, reg, str, sizeof(str));
+}
+
+void net_esnd_msg(const req_srv_t sv_type, const n_send_msg_t *n_snd)
+{
+    char str[E_MAXLINE];
+
+    /* 注册发消息请求监听器, 以便接收服务端响应的信息 */
+    add_listener(sv_type, (void*)n_snd, send_msg_listener);
+
+    e_debug("net_esnd_msg", "add <net_esnd_msg> listener!");
+
+    e_compress(sv_type, n_snd, str, sizeof(str));
+    
+    return;
 }

@@ -14,7 +14,8 @@ typedef enum {
 /* netagent 层收到服务端回复事件类型 */
 typedef enum {
     EV_LOGIN,
-    EV_REGISTER
+    EV_REGISTER,
+    EV_SEND_MSG
 } nty_evt_t;
 
 typedef struct _n_login_t {
@@ -84,5 +85,6 @@ int send_net_agent(const req_srv_t sv_type, void *base, size_t len);
 int send_net_notify(const int, const nty_evt_t, void *, size_t);
 void net_elogin(const req_srv_t sv_type, const n_login_t *login);
 void net_eregister(const req_srv_t sv_type, const n_register_t *reg);
+void net_esnd_msg(const req_srv_t sv_type, const n_send_msg_t *n_snd);
 
 #endif /* _NETREQ_H_ */

@@ -5,6 +5,7 @@
 
 n_login_t *login_arg = NULL;
 n_register_t *reg_arg = NULL;
+n_send_msg_t *snd_arg = NULL;
 
 /**
  * @brief  为args结构的请求(如n_login_t)添加回调监听,当服务端的响应时调用
@@ -69,4 +70,18 @@ void login_listener(void *base, size_t len)
             login->result, login_arg->idx);
 
     send_net_notify(login_arg->idx, EV_LOGIN, login, sizeof(n_login_res_t));
+}
+
+void send_msg_listener(void *base, size_t len)
+{
+    n_send_msg_res_t *n_snd_msg_res = NULL;
+
+    n_snd_msg_res = (n_send_msg_res_t *)base;
+
+    /* core dump [2012-09-11 18:29:20] */
+    e_debug("send_msg_listener", "n_send_msg_res[d], dlg id[%d]",
+            n_snd_msg_res->result, snd_arg->idx);
+
+    send_net_notify(snd_arg->idx, EV_SEND_MSG,
+                   n_snd_msg_res, sizeof(n_send_msg_res_t));
 }
