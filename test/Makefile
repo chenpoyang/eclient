@@ -14,12 +14,13 @@ CFLAGS		= -O2 -Wall -g -fPIC $(DEFINES)
 CXXFLAGS	= -O2 -Wall -g -fPIC $(DEFINES)
 
 # all target
-ALL_T		= test_trigger eserver test_ejson
+ALL_T		= test_trigger eserver test_ejson test_mjson
 
 # all object
 CORE_OBJ    = 
 CLIENT_OBJ	= test_trigger.o
-JSON_OBJ    = test_ejson.o
+JSON_OBJ    = test_ejson.o 
+MJSON_OBJ   = test_mjson.o
 SERVER_OBJ	= eserver.o
 ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(SERVER_OBJ) $(JSON_OBJ)
 
@@ -39,8 +40,11 @@ eserver: $(CORE_OBJ) $(SERVER_OBJ)
 test_ejson: $(CORE_OBJ) $(JSON_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ -lejson
 
-#.c.o:
-#	gcc -c -fPIC -o $@ $^
+test_mjson: $(CORE_OBJ) $(MJSON_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ -lejson
+
+.c.o:
+	gcc -c -fPIC -o $@ $^
 
 clean:
 	$(RM) $(ALL_OBJ) $(ALL_T) $(ALL_LIB)

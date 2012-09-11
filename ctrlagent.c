@@ -16,8 +16,9 @@ dlg_t dlg[MAX_DLG_BUF];
 /* 业务逻辑处理入口 */
 static cmd_info_t g_cmd_info[] = 
 {
-    {CMD_LOGIN, "e_login", ctrl_elogin}, 
-    {CMD_REGISTER, "e_register", ctrl_eregister}
+    { CMD_LOGIN, "e_login", ctrl_elogin }, 
+    { CMD_REGISTER, "e_register", ctrl_eregister },
+    { CMD_SEND_MSG, "e_send_msg", ctrl_esend_msg }
 };
 
 static void deal_notify_evt(void *base, size_t len);
@@ -204,7 +205,7 @@ void ctrl_eregister(size_t idx)
     ctrl_req_t *req = NULL; /* 指向请求的结构, 类型不确定, 方便获取原请求的数据 */
     net_notify_t *nty = NULL; /* 最终返回到netagent的回应数据, 类型未知 */
     req_srv_t evt = SV_REGISTER;
-    void *data;
+    void *data = NULL;
 
     req = dlg[idx].req;
     e_register = (e_register_t*)req->req;
@@ -230,9 +231,49 @@ void ctrl_eregister(size_t idx)
         else
         {
             e_register_result(n_register_res->result);
-            e_debug("ctrl_eregister", "timeout!");
+            e_debug("ctrl_eregister", "dialog timeout!");
         }
     }
+}
+
+void ctrl_esend_msg(size_t idx)
+{
+    e_send_msg_t *e_snd = NULL;
+    n_send_msg_t n_snd;
+    n_send_msg_res_t *n_snd_res = NULL;
+    ctrl_req_t *req = NULL;
+    net_notify_t *nty = NULL;
+    req_srv_t evt = SV_SEND_MSG;
+    void *data = NULL;
+
+    req = dlg[idx].req;
+    e_snd = (e_send_msg_t*)req->req;
+    n_snd.idx = idx;
+    n_snd.type = e_snd->type;
+    strcpy(n_snd.msg, e_snd->msg);
+    strcpy(n_snd.to, e_snd->to);
+    data = &n_snd;
+
+    control_dialog(idx, evt, &data, sizeof(n_send_msg_t));
+
+    /* call back to UI */
+    if (dlg[idx].step == DLG_STEP_FINISH)
+    {
+        if (dlg[idx].result == DLG_RES_ACK)
+        {
+            nty = dlg[idx].ack;
+            n_snd_res = nty->nty;
+            e_send_msg_result(n_snd_res->result);
+            e_debug("ctrl_esend_msg", "dialog ack!");
+        }
+        else
+        {
+            e_send_msg_result(n_snd_res->result);
+            e_debug("ctrl_esend_msg", "dialog timeout!");
+        }
+    }
+    
+    return;
 }
 
 /* 待验证 */

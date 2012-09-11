@@ -29,8 +29,10 @@ CORE_OBJ    = trigger.o elog.o memdef.o list.o
 
 CLIENT_OBJ	= recver.o conn.o ctrlagent.o ctrlhandler.o eevent.o elistener.o \
 			  eparser.o erequest.o netagent.o netreq.o sender.o jsonpro.o
-JSONP_OBJ   = jsonpro.o
+JSONP_OBJ   = jsonpro.o json.o json_helper.o
 TEST_OBJ    = emain.o
+
+vpath ./mjson
 
 ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(TEST_OBJ)
 
@@ -81,6 +83,9 @@ eparser.o: eparser.c common.h elog.h netreq.h eparser.h trigger.h \
  memdef.h list.h elistener.h sender.h conn.h
 erequest.o: erequest.c erequest.h common.h elog.h trigger.h memdef.h \
  list.h
+json.o: json.c json.h
+json_helper.o: json_helper.c json_helper.h json.h
+jsonpro.o: jsonpro.c jsonpro.h
 list.o: list.c list.h
 memdef.o: memdef.c memdef.h trigger.h list.h
 netagent.o: netagent.c netagent.h netreq.h common.h elog.h ctrlagent.h \
@@ -91,4 +96,3 @@ recver.o: recver.c erequest.h common.h elog.h trigger.h memdef.h list.h \
  eparser.h netreq.h recver.h conn.h
 sender.o: sender.c sender.h conn.h elog.h common.h
 trigger.o: trigger.c common.h elog.h trigger.h memdef.h list.h
-jsonpro.o: jsonpro.c jsonpro.h

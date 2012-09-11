@@ -7,7 +7,8 @@
 /* netagent 层请求事件 */
 typedef enum {
     SV_LOGIN,
-    SV_REGISTER
+    SV_REGISTER,
+    SV_SEND_MSG
 } req_srv_t;
 
 /* netagent 层收到服务端回复事件类型 */
@@ -16,8 +17,7 @@ typedef enum {
     EV_REGISTER
 } nty_evt_t;
 
-typedef struct _n_login_t 
-{
+typedef struct _n_login_t {
     /* dialog mark */
     int idx;
     char usr[E_MINLINE];
@@ -25,8 +25,12 @@ typedef struct _n_login_t
     eclient_listener listener;
 } n_login_t;
 
-typedef struct _n_register_t
+typedef struct _n_login_res_t
 {
+    int result;
+} n_login_res_t;
+
+typedef struct _n_register_t {
     /* dialog mark */
     int idx;
     char usr[E_MINLINE];
@@ -35,15 +39,34 @@ typedef struct _n_register_t
     eclient_listener listener;
 } n_register_t;
 
-typedef struct _n_login_res_t
-{
-    int result;
-} n_login_res_t;
-
 typedef struct _n_register_res_t
 {
     int result;
 } n_register_res_t;
+
+typedef struct _n_send_msg_t {
+    int idx;
+    int type;
+    char msg[E_MAXLINE];
+    char to[E_MINLINE];
+    eclient_listener listener;
+} n_send_msg_t;
+
+typedef struct _n_send_msg_res_t 
+{
+    int result;
+    char msg[E_MAXLINE];
+    char to[E_MINLINE];
+    char from[E_MINLINE];
+} n_send_msg_res_t;
+
+/* received msg from server */
+typedef struct _n_msg_arrived_t 
+{
+    char msg[E_MAXLINE];
+    char to[E_MINLINE];
+    char from[E_MINLINE];
+} n_msg_arrived_t;
 
 typedef struct _net_req_t {
     int cmd;

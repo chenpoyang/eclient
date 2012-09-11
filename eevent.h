@@ -9,5 +9,6 @@ typedef enum {
 
 void e_login_result(int result);
 void e_register_result(int result);
+void e_send_msg_result(int result);
 
 #endif /* _E_EVENT_H_ */

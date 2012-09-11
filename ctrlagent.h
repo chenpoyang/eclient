@@ -45,6 +45,7 @@ typedef struct _cmd_info_t {
 void ctrlagent(int, void *, size_t, int);
 void ctrl_elogin(size_t idx);
 void ctrl_eregister(size_t idx);
+void ctrl_esend_msg(size_t idx);
 void deal_dialog(int idx);
 int validate_dlg(const int idx);
 

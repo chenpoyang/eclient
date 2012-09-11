@@ -39,7 +39,7 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             login = (n_login_t *)base;
             snprintf(ret, len, "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
                      "action", "login",
-                     "user", login->usr,
+                     "userid", login->usr,
                      "passwd", login->pwd);
 
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)

@@ -11,3 +11,8 @@ usage
 =====
 1. cd test && ./server
 2. ./emain
+
+mjson
+=====
+mjson-1.5:http://sourceforge.net/projects/mjson/files/
+files json.c json.h json_helper.c json_helper.h
