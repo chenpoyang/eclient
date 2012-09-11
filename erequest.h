@@ -19,6 +19,7 @@ typedef struct _e_register_t
 {
     char usr[E_MINLINE];
     char pwd[E_MINLINE];
+    char repwd[E_MINLINE];
 } e_register_t;
 
 typedef struct _ctrl_req_t {
@@ -32,6 +33,6 @@ typedef struct _ctrl_notify_t {
 } ctrl_notify_t;
 
 int e_login(const char *usr, const char *pwd);
-int e_register(const char *usr, const char *pwd);
+int e_register(const char *usr, const char *pwd, const char *repwd);
 
 #endif /* _EREQUEST_H_ */

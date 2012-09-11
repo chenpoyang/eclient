@@ -23,7 +23,7 @@ int main(int argc, const char *argv[])
     e_debug("emain\t", "user's new request from erequest");
 
     e_login("eemeeuser", "eemeepwd");
-    e_register("reg_user", "reg_pwd");
+    e_register("reg_user", "reg_pwd", "reg_pwd");
 
     thread_wait(5);/* 确保e_login()成功回调到用户 */
     

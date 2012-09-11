@@ -19,7 +19,7 @@ static int send_ctrl_agent(int evt, void *base, size_t len)
     return send_signal(CTRL_REQ_EVT, base, len, 0, recver);
 }
 
-int e_register(const char *usr, const char *pwd)
+int e_register(const char *usr, const char *pwd, const char *repwd)
 {
     ctrl_req_t req = { CMD_REGISTER };
     e_register_t *reg = NULL;
@@ -34,6 +34,7 @@ int e_register(const char *usr, const char *pwd)
 
     strcpy(reg->usr, usr);
     strcpy(reg->pwd, pwd);
+    strcpy(reg->repwd, repwd);
     req.req = reg;
 
     e_debug("e_register", "register request, usr[%s], pwd[%s], send:ctrlagent",

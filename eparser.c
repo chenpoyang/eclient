@@ -21,7 +21,8 @@
 int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
 {
     n_login_t *login = NULL;
-    int idx, flg = EME_OK;
+    n_register_t *reg = NULL;
+    int flg = EME_OK;
     conn_t *con = NULL;
     
     con = get_connection();
@@ -32,12 +33,14 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
     
     switch (sv_type)
     {
-        /* 登陆协议范例: "1 username password" */
+            /* 登陆协议范例:
+               [{"action":"login","user":"weimade","passwd":"123456"}] */
         case SV_LOGIN:
             login = (n_login_t *)base;
-            srand(time(NULL));
-            idx = rand() % 2;
-            snprintf(ret, len, "%d %s %s", idx, login->usr, login->pwd);
+            snprintf(ret, len, "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
+                     "action", "login",
+                     "user", login->usr,
+                     "passwd", login->pwd);
 
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
@@ -48,6 +51,14 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             break;
 
         case SV_REGISTER:
+            reg = (n_register_t *)base;
+            snprintf(ret, len,
+            "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
+                     "action", "reg",
+                     "user", reg->usr,
+                     "passwd", reg->pwd,
+                     "repasswd", reg->repwd);
+            
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
@@ -81,6 +92,7 @@ void e_decompress(const char *buf, size_t len)
     e_debug("e_decompress", "received new data from server[%s]", buf);
     e_debug("e_decompress", "transfering [%d] bytes to 'elistener'", len);
 
+    /* json 数据形式的自定义协议, 或其他协议 */
     /* TODO send_signal到netagent前需将接收到字符串解析成相应的数据结构 */
     if (strstr(buf, "eemeeuser") != NULL && strstr(buf, "eemeepwd") != NULL)
     {
@@ -98,14 +110,14 @@ void e_decompress(const char *buf, size_t len)
         reg->result = EME_OK;
 
         flg_ok = 1;
-        reg_arg->listener(reg, sizeof(n_register_res_t)); /* core dump */
+        reg_arg->listener(reg, sizeof(n_register_res_t));
         
         e_debug("e_decompress", "decompress success, register callback!");
     }
 
     if (flg_ok)
     {
-        e_debug("e_decompress", "decompress success");
+        e_debug("e_decompress", "decompress success[%s]", buf);
     }
     else
     {

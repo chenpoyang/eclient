@@ -211,6 +211,7 @@ void ctrl_eregister(size_t idx)
     n_register.idx = idx;
     strcpy(n_register.usr, e_register->usr);
     strcpy(n_register.pwd, e_register->pwd);
+    strcpy(n_register.repwd, e_register->repwd);
     data = &n_register;
 
     control_dialog(idx, evt, &data, sizeof(n_register_t));

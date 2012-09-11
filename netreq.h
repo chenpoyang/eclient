@@ -31,6 +31,7 @@ typedef struct _n_register_t
     int idx;
     char usr[E_MINLINE];
     char pwd[E_MINLINE];
+    char repwd[E_MINLINE];
     eclient_listener listener;
 } n_register_t;
 

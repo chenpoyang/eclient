@@ -90,7 +90,6 @@ void net_eregister(const req_srv_t sv_type, const n_register_t *reg)
 {
     char str[E_MAXLINE] = "";
 
-    sprintf(str, "%s %s", reg->usr, reg->pwd);
 
     e_debug("net_eregister", "[%s] is pending to be sent", str);
 

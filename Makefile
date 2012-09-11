@@ -27,26 +27,32 @@ ALL_T		= emain
 # all object
 CORE_OBJ    = trigger.o elog.o memdef.o list.o
 
-CLIENT_OBJ	= emain.o conn.o ctrlagent.o ctrlhandler.o eevent.o elistener.o \
-			  eparser.o erequest.o netagent.o netreq.o recver.o sender.o jsonpro.o
+CLIENT_OBJ	= recver.o conn.o ctrlagent.o ctrlhandler.o eevent.o elistener.o \
+			  eparser.o erequest.o netagent.o netreq.o sender.o jsonpro.o
+JSONP_OBJ   = jsonpro.o
+TEST_OBJ    = emain.o
 
-ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ)
+ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(TEST_OBJ)
 
 # .so .a
 LIBCORE  	= libtrigger.so
 LIBECLIENT	= libeclient.so
-ALL_LIB     = $(LIBCORE) $(LIBECLIENT)
+LIBJSON	    = libejson.so
+ALL_LIB     = $(LIBCORE) $(LIBECLIENT) $(LIBJSON)
 
 # Targets start here
 all:	$(ALL_OBJ) $(ALL_LIB) $(ALL_T)
 
-emain: $(CORE_OBJ) $(CLIENT_OBJ)
+emain: $(CORE_OBJ) $(CLIENT_OBJ) $(TEST_OBJ)
 	$(CC) $(CFLAGS) -o $@ -lpthread $^
 
 $(LIBCORE) : $(CORE_OBJ)
 	$(CC) -fPIC -shared -o $@ $^
 
 $(LIBECLIENT) : $(CLIENT_OBJ)
+	$(CC) -fPIC -shared -o $@ $^
+
+$(LIBJSON) : $(JSONP_OBJ)
 	$(CC) -fPIC -shared -o $@ $^
 
 #.c.o:

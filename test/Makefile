@@ -14,13 +14,14 @@ CFLAGS		= -O2 -Wall -g -fPIC $(DEFINES)
 CXXFLAGS	= -O2 -Wall -g -fPIC $(DEFINES)
 
 # all target
-ALL_T		= test_trigger eserver
+ALL_T		= test_trigger eserver test_ejson
 
 # all object
 CORE_OBJ    = 
 CLIENT_OBJ	= test_trigger.o
+JSON_OBJ    = test_ejson.o
 SERVER_OBJ	= eserver.o
-ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(SERVER_OBJ)
+ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(SERVER_OBJ) $(JSON_OBJ)
 
 # .so .a
 LIBCORE  	=
@@ -35,6 +36,9 @@ test_trigger: $(CORE_OBJ) $(CLIENT_OBJ)
 eserver: $(CORE_OBJ) $(SERVER_OBJ)
 	$(CC) $(CFLAGS) -o $@ -lpthread $^
 
+test_ejson: $(CORE_OBJ) $(JSON_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ -lejson
+
 #.c.o:
 #	gcc -c -fPIC -o $@ $^
 
@@ -45,6 +49,3 @@ clean:
 .PHONY: clean all
 
 # DO NOT DELETE
-global.o: global.c global.h
-eserver.o: eserver.c global.h
-test_trigger.o: test_trigger.c
