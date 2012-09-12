@@ -78,7 +78,7 @@ int e_login(const char *usr, const char *pwd)
         return EME_ERR;
     }
 
-    login = calloc(1, sizeof(e_login_t));
+    login = malloc(sizeof(e_login_t));
     strcpy(login->usr, usr);
     strcpy(login->pwd, pwd);
     req.req = login;

@@ -449,42 +449,45 @@ static void clear_dialog(int idx)
         }
     }
 
-    if (dlg[idx].net_req->req != NULL) /* core dump [2012-09-07 14:14:57] */
-    {
-        free(dlg[idx].net_req->req);
-        dlg[idx].net_req = NULL;
-        e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "net_req->req");
-    }
+
 
     if (dlg[idx].net_req != NULL)
     {
+        /* 释放子资源 */
+        if (dlg[idx].net_req->req != NULL)
+        {
+            free(dlg[idx].net_req->req);
+            dlg[idx].net_req = NULL;
+            e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "net_req->req");
+        }
+        
         free(dlg[idx].net_req);
         dlg[idx].net_req = NULL;
         e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "net_req");
     }
 
-    if (dlg[idx].req->req != NULL)
-    {
-        free(dlg[idx].req->req);
-        dlg[idx].req->req = NULL;
-        e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "req->req");
-    }
-    
     if (dlg[idx].req != NULL)
     {
+        /* 释放子资源 */
+        if (dlg[idx].req->req != NULL)
+        {
+            free(dlg[idx].req->req);
+            dlg[idx].req->req = NULL;
+            e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "req->req");
+        }
         free(dlg[idx].req);
         dlg[idx].req = NULL;
         e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "req");
     }
 
-    if (dlg[idx].ack->nty != NULL)
-    {
-        free(dlg[idx].ack->nty);
-        dlg[idx].ack->nty = NULL;
-    }
-
     if (dlg[idx].ack != NULL)
     {
+        /* 释放子资源 */
+        if (dlg[idx].ack->nty != NULL)
+        {
+            free(dlg[idx].ack->nty);
+            dlg[idx].ack->nty = NULL;
+        }
         free(dlg[idx].ack);
         dlg[idx].ack = NULL;
         e_debug("clear_dialog", "dlg[%d]'s member [%s]", idx, "ack");

@@ -287,15 +287,15 @@ void init_agent(int id, const char *name, agent_handler handler)
         }
     }
 
-    agt = (agent_t *)calloc(1, sizeof(agent_t));
+    agt = (agent_t *)malloc(sizeof(agent_t));
     if (NULL == agt)
     {
-        e_error("init_agent", "calloc error on init_one_agent!\n");
+        e_error("init_agent", "malloc error on init_one_agent!\n");
         return;
     }
 
     agt->id = id;
-    agt->name = (char *)calloc(1, strlen(name) + 1);
+    agt->name = (char *)malloc(strlen(name) + 1);
     strcpy(agt->name, name);
     agt->status = AGENT_WAIT;
     agt->handler = handler;

@@ -19,7 +19,7 @@ CFLAGS		= -O0 -Wall -g -g3 -fPIC $(LDFLAGS)
 CXXFLAGS	= -O0 -Wall -g -g3 -fPIC $(LDFLAGS)
 #CFLAGS		= -O2 -Wall -g $(LDFLAGS)
 #CXXFLAGS	= -O2 -Wall -g $(LDFLAGS)
-LDFLAGS		= -D_REENTRANT
+LDFLAGS		= -D_REENTRANT -DNO_ELOG
 
 # all target
 ALL_T		= emain
@@ -32,9 +32,7 @@ CLIENT_OBJ	= recver.o conn.o ctrlagent.o ctrlhandler.o eevent.o elistener.o \
 JSONP_OBJ   = jsonpro.o json.o json_helper.o
 TEST_OBJ    = emain.o
 
-vpath ./mjson
-
-ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(TEST_OBJ)
+ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(TEST_OBJ) $(JSONP_OBJ)
 
 # .so .a
 LIBCORE  	= libtrigger.so

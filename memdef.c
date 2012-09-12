@@ -14,7 +14,7 @@ void *agent_dup(void *ptr)
     cp_agt->id = agt->id;
 
     len = strlen(agt->name);
-    cp_agt->name = (char *)calloc(1, len + 1);
+    cp_agt->name = (char *)malloc(len + 1);
     strncpy(cp_agt->name, agt->name, len);
     cp_agt->name[len] = '\0';
 

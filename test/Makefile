@@ -29,7 +29,7 @@ LIBCORE  	=
 ALL_LIB     = $(LIBCORE)
 
 # Targets start here
-all:	$(ALL_OBJ) $(ALL_LIB) $(ALL_T)
+all: $(ALL_OBJ) $(ALL_LIB) $(ALL_T)
 
 test_trigger: $(CORE_OBJ) $(CLIENT_OBJ)
 	$(CC) $(CFLAGS) -o $@ -lpthread $^
