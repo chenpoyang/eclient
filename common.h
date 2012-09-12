@@ -2,6 +2,7 @@
 #define _COMMON_H_
 
 #include <stddef.h>
+#include <assert.h>
 #include "elog.h"
 
 /* 逻辑线程的id */

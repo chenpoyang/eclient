@@ -106,6 +106,7 @@ void e_decompress(const char *buf, size_t len)
 {
     n_login_res_t *login = NULL;
     n_register_res_t *reg = NULL;
+    n_send_msg_res_t *n_snd = NULL;
     int flg_ok = 0;
 
     e_debug("e_decompress", "received new data from server[%s]", buf);
@@ -132,6 +133,17 @@ void e_decompress(const char *buf, size_t len)
         reg_arg->listener(reg, sizeof(n_register_res_t));
         
         e_debug("e_decompress", "decompress success, register callback!");
+    }
+    else if (strstr(buf, "sendmsg") != NULL)
+    {
+        n_snd = malloc(sizeof(n_send_msg_res_t));
+        n_snd->result = EME_OK;
+
+        flg_ok = 1;
+        assert(snd_arg != NULL);
+        snd_arg->listener(n_snd, sizeof(n_send_msg_res_t));
+
+        e_debug("e_decompress", "decompress success, send msg callback!");
     }
 
     if (flg_ok)

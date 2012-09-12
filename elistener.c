@@ -20,15 +20,22 @@ add_listener(const req_srv_t tp, void *args, eclient_listener listener)
     switch (tp)
     {
         case SV_LOGIN:
-            login_arg = (n_login_t*)args;
+            login_arg = (n_login_t *)args;
             login_arg->listener = listener;
-            e_debug("reg_listener", "event[%s] has added listener", "SV_LOGIN");
+            e_debug("reg_listener", "event[%s] has added listener",
+                    "SV_LOGIN");
             break;
             
         case SV_REGISTER:
-            reg_arg = (n_register_t*)args;
+            reg_arg = (n_register_t *)args;
             reg_arg->listener = listener;
-            e_debug("add_listener", "event[%s] has added listener", "SV_REGISTER");
+            e_debug("add_listener", "event[%s] has added listener",
+                    "SV_REGISTER");
+        case SV_SEND_MSG:
+            snd_arg = (n_send_msg_t *)args;
+            snd_arg->listener = listener;
+            e_debug("add_listener", "event[%s] has added listener",
+                    "SV_SEND_MSG");
             break;
             
         default:
@@ -79,7 +86,7 @@ void send_msg_listener(void *base, size_t len)
     n_snd_msg_res = (n_send_msg_res_t *)base;
 
     /* core dump [2012-09-11 18:29:20] */
-    e_debug("send_msg_listener", "n_send_msg_res[d], dlg id[%d]",
+    e_debug("send_msg_listener", "n_send_msg_res[%d], dlg id[%d]",
             n_snd_msg_res->result, snd_arg->idx);
 
     send_net_notify(snd_arg->idx, EV_SEND_MSG,

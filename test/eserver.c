@@ -141,7 +141,7 @@ void *recv_thrd(void *arg)   /* server for client */
             *ptr = '\0';
         }
         send(sock_fd, res_str, strlen(res_str) + 1, 0);
-        printf("server send:%s\r\n", res_str);
+        printf("server send:[%s]\r\n", res_str);
     }
 
     close(sock_fd);
