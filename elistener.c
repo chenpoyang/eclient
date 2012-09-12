@@ -86,7 +86,7 @@ void send_msg_listener(void *base, size_t len)
     n_snd_msg_res = (n_send_msg_res_t *)base;
 
     /* core dump [2012-09-11 18:29:20] */
-    e_debug("send_msg_listener", "n_send_msg_res[%d], dlg id[%d]",
+    e_debug("send_msg_lis", "n_send_msg_res[%d], dlg id[%d]",
             n_snd_msg_res->result, snd_arg->idx);
 
     send_net_notify(snd_arg->idx, EV_SEND_MSG,

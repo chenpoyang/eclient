@@ -68,10 +68,6 @@ void net_elogin(const req_srv_t sv_type, const n_login_t *login)
 {
     char str[E_MAXLINE] = "";
 
-    sprintf(str, "%d %s %s", 1, login->usr, login->pwd);
-    
-    e_debug("net_login", "[%s] is pending to be sent", str);
-
     /* 注册登请求的监听器, 以便接收服务端响应的信息 */
     add_listener(sv_type, (void*)login, login_listener);
     
@@ -100,7 +96,7 @@ void net_eregister(const req_srv_t sv_type, const n_register_t *reg)
 
 void net_esnd_msg(const req_srv_t sv_type, const n_send_msg_t *n_snd)
 {
-    char str[E_MAXLINE];
+    char str[E_MAXLINE] = "";
 
     /* 注册发消息请求监听器, 以便接收服务端响应的信息 */
     add_listener(sv_type, (void*)n_snd, send_msg_listener);

@@ -26,7 +26,7 @@ static void deal_req_evt(void *base, size_t len);
 static int alloc_dialog(int cmd_info_idx);
 static void clear_dialog(int idx);
 static int find_entrance(int cmd);
-static void control_dialog(size_t, const req_srv_t, void **, size_t);
+static void control_dialog(size_t, const req_srv_t, void *, size_t);
 
 /* entrance */
 void ctrlagent(int evt, void *base, size_t len, int cmd)
@@ -205,7 +205,6 @@ void ctrl_eregister(size_t idx)
     ctrl_req_t *req = NULL; /* 指向请求的结构, 类型不确定, 方便获取原请求的数据 */
     net_notify_t *nty = NULL; /* 最终返回到netagent的回应数据, 类型未知 */
     req_srv_t evt = SV_REGISTER;
-    void *data = NULL;
 
     req = dlg[idx].req;
     e_register = (e_register_t*)req->req;
@@ -213,9 +212,8 @@ void ctrl_eregister(size_t idx)
     strcpy(n_register.usr, e_register->usr);
     strcpy(n_register.pwd, e_register->pwd);
     strcpy(n_register.repwd, e_register->repwd);
-    data = &n_register;
 
-    control_dialog(idx, evt, &data, sizeof(n_register_t));
+    control_dialog(idx, evt, &n_register, sizeof(n_register_t));
     
     /* call back to UI */
     if (dlg[idx].step == DLG_STEP_FINISH)
@@ -244,7 +242,6 @@ void ctrl_esend_msg(size_t idx)
     ctrl_req_t *req = NULL;
     net_notify_t *nty = NULL;
     req_srv_t evt = SV_SEND_MSG;
-    void *data = NULL;
 
     req = dlg[idx].req;
     e_snd = (e_send_msg_t*)req->req;
@@ -252,9 +249,8 @@ void ctrl_esend_msg(size_t idx)
     n_snd.type = e_snd->type;
     strcpy(n_snd.msg, e_snd->msg);
     strcpy(n_snd.to, e_snd->to);
-    data = &n_snd;
 
-    control_dialog(idx, evt, &data, sizeof(n_send_msg_t));
+    control_dialog(idx, evt, &n_snd, sizeof(n_send_msg_t));
 
     /* call back to UI */
     if (dlg[idx].step == DLG_STEP_FINISH)
@@ -278,12 +274,12 @@ void ctrl_esend_msg(size_t idx)
 
 /* 待验证 */
 static void
-control_dialog(size_t idx, const req_srv_t evt, void **data, size_t len)
+control_dialog(size_t idx, const req_srv_t evt, void *data, size_t len)
 {
     int ret, opr_id;
     
     opr_id = dlg[idx].opr;
-    e_debug("ctrl_eregister", "dealing new dlg[%d], name [%s]",
+    e_debug("control_dialog", "dealing new dlg[%d], name [%s]",
             opr_id, g_cmd_info[opr_id].name);
     
     if (DLG_STEP_INIT == dlg[idx].step)
@@ -303,7 +299,7 @@ control_dialog(size_t idx, const req_srv_t evt, void **data, size_t len)
     if (DLG_RES_IDLE == dlg[idx].result)
     {
         e_debug("control_dialog", "new dialog's data will be sent to netagent");
-        ret = send_net_agent(evt, *data, len);
+        ret = send_net_agent(evt, data, len);
         if (ret != EME_OK)
         {
             dlg[idx].result = DLG_RES_TIMEOUT;

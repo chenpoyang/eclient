@@ -172,6 +172,7 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
 
             net_esnd_msg(sv_type, n_snd);
 
+            /* log msg  abnormal */
             e_debug("deal_ctrl_net",
                     "transfer to netagent success, type[%d], msg[%s], to[%s]",
                     n_snd->type, n_snd->msg, n_snd->to);

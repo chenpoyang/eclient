@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <errno.h>
 #include <sys/socket.h>
 #include "sender.h"
@@ -24,6 +25,9 @@ cem */
 int eme_send(conn_t *con, void * const buf, const size_t len)
 {
     int snd_bytes, err, start;
+#ifdef D_EME_SOCKET
+    char str[E_MAXLINE];
+#endif
 
     if (con->state != CONNECTED)
     {
@@ -35,7 +39,11 @@ int eme_send(conn_t *con, void * const buf, const size_t len)
     while (start)
     {
         snd_bytes = send(con->fd, buf, len, 0);
-
+#ifdef D_EME_SOCKET
+        strncpy(str, buf, len);
+        str[len] = '\0';
+        printf("SEND:\t[%s]\n", str);
+#endif
         e_debug("eme_send", "fd (%d) send %d of %d, data = [%s]",
                 con->fd, snd_bytes, len, buf);
 

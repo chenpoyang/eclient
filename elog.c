@@ -48,7 +48,7 @@ void e_error(const char *area, const char *fmt, ...)
     va_end(ap);
 }
 
-#ifdef _NO_ELOG
+#ifdef D_EME_SOCKET
 static void	
 e_log(const e_log_level_t lvl, const char *area,
           const char *fmt, va_list ap) { return; }

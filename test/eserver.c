@@ -119,7 +119,7 @@ void *recv_thrd(void *arg)   /* server for client */
     {
         buf[rec_bytes] = '\0';
         time(&cur_time);
-        printf("RECV(%d)\t:[%s], server time:%s", 
+        printf("RECV(%d)\t:[%s]\t server time:%s", 
                 cli_ptr->con_fd, buf, ctime(&cur_time));
 
         time(&cur_time);

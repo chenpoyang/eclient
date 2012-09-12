@@ -19,7 +19,7 @@ CFLAGS		= -O0 -Wall -g -g3 -fPIC $(LDFLAGS)
 CXXFLAGS	= -O0 -Wall -g -g3 -fPIC $(LDFLAGS)
 #CFLAGS		= -O2 -Wall -g $(LDFLAGS)
 #CXXFLAGS	= -O2 -Wall -g $(LDFLAGS)
-LDFLAGS		= -D_REENTRANT -DNO_ELOG
+LDFLAGS		= -D_REENTRANT -DD_EME_SOCKET
 
 # all target
 ALL_T		= emain

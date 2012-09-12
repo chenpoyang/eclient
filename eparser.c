@@ -25,14 +25,15 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
     n_send_msg_t *n_snd = NULL;
     int flg = EME_OK;
     conn_t *con = NULL;
-    char eme_user[] = "eme_cpy";
+    char eme_user[] = "a@icross.com";
     
     con = get_connection();
     if (get_state(con) != CONNECTED)
     {
         e_error("e_compress", "please connect first!");
     }
-    
+
+    strcpy(ret, "");
     switch (sv_type)
     {
 /* 登陆协议:
@@ -42,15 +43,15 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             snprintf(ret, len, "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
                      "action", "login",
                      "userid", login->usr,
-                     "passwd", login->pwd);
+                     "password", login->pwd);
 
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
             }
-
             break;
+            
 /* 注册协议:
 {"action":"reg","user":"weimade","passwd":"123456","repasswd":"123456"} */
         case SV_REGISTER:
@@ -61,7 +62,7 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
                      "user", reg->usr,
                      "passwd", reg->pwd,
                      "repasswd", reg->repwd);
-            
+            printf("+1\n");
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
@@ -69,6 +70,7 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
             }
             
             break;
+            
 /* 发消息协议:
 {"action":"sendmsg","msg":"xxxeeeee","to":"b@icross.com","from":"a@icross.com"} */
         case SV_SEND_MSG:
@@ -85,6 +87,7 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
             }
+            break;
             
         default:
             break;
@@ -114,7 +117,7 @@ void e_decompress(const char *buf, size_t len)
 
     /* json 数据形式的自定义协议, 或其他协议 */
     /* TODO send_signal到netagent前需将接收到字符串解析成相应的数据结构 */
-    if (strstr(buf, "eemeeuser") != NULL && strstr(buf, "eemeepwd") != NULL)
+    if (strstr(buf, "action") != NULL && strstr(buf, "login") != NULL)
     {
         login = malloc(sizeof(n_login_res_t)); /* 由dlg[idx].ack管理内存 */
         login->result = EME_OK;
@@ -124,7 +127,7 @@ void e_decompress(const char *buf, size_t len)
         
         e_debug("e_decompress", "decompress success, login callback!");
     }
-    else if (strstr(buf, "reg_user") != NULL && strstr(buf, "reg_pwd") != NULL)
+    else if (strstr(buf, "action") != NULL && strstr(buf, "reg") != NULL)
     {
         reg = malloc(sizeof(n_register_res_t)); /* 由dlg[idx].ack管理内存 */
         reg->result = EME_OK;
@@ -134,7 +137,7 @@ void e_decompress(const char *buf, size_t len)
         
         e_debug("e_decompress", "decompress success, register callback!");
     }
-    else if (strstr(buf, "sendmsg") != NULL)
+    else if (strstr(buf, "action") != NULL && strstr(buf, "sendmsg") != NULL)
     {
         n_snd = malloc(sizeof(n_send_msg_res_t));
         n_snd->result = EME_OK;

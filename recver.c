@@ -79,32 +79,47 @@ void *daemon_recver(void *arg)
     conn_t *con = (conn_t*)arg;
     fd_set rset; /* 读集合 */
     struct timeval tv; /* 等待1秒 */
+#ifdef D_EME_SOCKET
+    int len;
+    char str[E_MAXLINE];
+#endif
 
     e_debug("daemon_recver", "revcer thread start!");
 
     start = 1;
+    FD_ZERO(&rset);
     FD_SET(con->fd, &rset);
     max_fd = con->fd > max_fd ? con->fd + 1 : max_fd + 1;
-    tv.tv_sec = 3;
+    tv.tv_sec = 10;
     tv.tv_usec = 1000;
     ready = 0;
     while (start)
     {
-        /* 默认阴塞式 */
-        ready = e_select(max_fd, &rset, NULL, NULL, &tv);
-        if (ready)
+        /* 默认阻塞式 */
+        ready = e_select(max_fd, &rset, NULL, NULL, NULL);
+        if (ready > 0)
         {
             recv_bytes = eme_recv(con, buf, MAX_RECV_BUF);
+#ifdef D_EME_SOCKET
+            len = recv_bytes;
+            strncpy(str, buf, len);
+            str[len] = '\0';
+            printf("RECV:\t[%s]\n", str);
+#endif            
             buf[recv_bytes] = '\0';
             /* 交给协议解析模块 */
             e_decompress(buf, recv_bytes + 1);
             e_debug("daemon_recver", "select ready[%d], received[%d]",
                     ready, recv_bytes);
         }
-
+        else if (ready < 0)
+        {
+            e_error("daemon_recver", "select error, recver exit!");
+            start = 0;
+        }
+        
         /* thread exit or not, depend on the value of start */
         /* start = get_recver_thrd_status(); */
-
         if (con->state != CONNECTED)
         {
             e_debug("daemon_recver", "disconnected, daemon_recver exit!");
