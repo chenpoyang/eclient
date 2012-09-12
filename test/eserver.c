@@ -84,11 +84,10 @@ int main(int argc, char *argv[])
     while (1)
     {
         con_fd = accept(sock_fd, (struct sockaddr*)NULL, NULL);
-        printf("a client connected!\n");
+        printf("STAT\t:a client(%d) connected!\n", con_fd);
         
         /* get the nickname of the client */
         cli[cli_que_len].con_fd = con_fd;
-        printf("fd = %d\n", con_fd);
         strcpy(cli[cli_que_len].nick, "new user!");
 
         /* create server thread for a new client */
@@ -116,16 +115,12 @@ void *recv_thrd(void *arg)   /* server for client */
 
     cli_ptr = (Client *)arg;
     sock_fd = cli_ptr->con_fd;
-    printf("thread nick: %s\nthread fd: %d\n", cli_ptr->nick, cli_ptr->con_fd);
-
     while ((rec_bytes = recv(sock_fd, buf, sizeof(buf), 0)) > 0)
     {
         buf[rec_bytes] = '\0';
         time(&cur_time);
-        puts("----------------------------------------");
-        printf("server receive(%d):\r\n[%s]\r\nserver time:%s\r\n", 
+        printf("RECV(%d)\t:[%s], server time:%s", 
                 cli_ptr->con_fd, buf, ctime(&cur_time));
-        puts("----------------------------------------");
 
         time(&cur_time);
         strcpy(res_str, buf);
@@ -141,12 +136,12 @@ void *recv_thrd(void *arg)   /* server for client */
             *ptr = '\0';
         }
         send(sock_fd, res_str, strlen(res_str) + 1, 0);
-        printf("server send:[%s]\r\n", res_str);
+        printf("SEND(%d)\t:[%s]\n", sock_fd, res_str);
     }
 
     close(sock_fd);
     remove_client(sock_fd);
-    printf("a client(%d) quit!\n", cli_ptr->con_fd);
+    printf("STAT\t:a client(%d) quit!\n", cli_ptr->con_fd);
 
     pthread_exit(NULL);
 }
