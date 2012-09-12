@@ -5,6 +5,7 @@
 #include "common.h"
 #include "netreq.h"
 #include "eparser.h"
+#include "json.h"
 #include "trigger.h"
 #include "elistener.h"
 #include "sender.h"
@@ -18,7 +19,7 @@
  * @param  len     缓冲区长度
  * @return int, EME_OK or EME_ERR, 压缩成功或失败
  */
-int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
+int e_compress(const req_srv_t sv_type, const void *base, char *str, size_t len)
 {
     n_login_t *login = NULL;
     n_register_t *reg = NULL;
@@ -26,6 +27,8 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
     int flg = EME_OK;
     conn_t *con = NULL;
     char eme_user[] = "a@icross.com";
+    json_t *root = NULL, *entity = NULL, *label = NULL, *value = NULL;
+    char *ret = NULL;
     
     con = get_connection();
     if (get_state(con) != CONNECTED)
@@ -33,41 +36,73 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
         e_error("e_compress", "please connect first!");
     }
 
-    strcpy(ret, "");
     switch (sv_type)
     {
 /* 登陆协议:
 [{"action":"login","user":"weimade","passwd":"123456"}] */
         case SV_LOGIN:
             login = (n_login_t *)base;
-            snprintf(ret, len, "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
-                     "action", "login",
-                     "userid", login->usr,
-                     "password", login->pwd);
+            root = json_new_object();
 
+            label = json_new_string("action");
+            value = json_new_string("login");
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("userid");
+            value = json_new_string(login->usr);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("password");
+            value = json_new_string(login->pwd);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            json_tree_to_string(root, &ret);
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
             }
+            free(ret);
+            json_free_value(&root);
             break;
             
 /* 注册协议:
 {"action":"reg","user":"weimade","passwd":"123456","repasswd":"123456"} */
         case SV_REGISTER:
             reg = (n_register_t *)base;
-            snprintf(ret, len,
-            "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
-                     "action", "reg",
-                     "user", reg->usr,
-                     "passwd", reg->pwd,
-                     "repasswd", reg->repwd);
-            printf("+1\n");
+            root = json_new_object();
+
+            label = json_new_string("action");
+            value = json_new_string("reg");
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("user");
+            value = json_new_string(reg->usr);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("passwd");
+            value = json_new_string(reg->pwd);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("repasswd");
+            value = json_new_string(reg->repwd);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+            
+            json_tree_to_string(root, &ret);
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
             }
+            free(ret);
+            json_free_value(&root);
             
             break;
             
@@ -75,18 +110,36 @@ int e_compress(const req_srv_t sv_type, const void *base, char *ret, size_t len)
 {"action":"sendmsg","msg":"xxxeeeee","to":"b@icross.com","from":"a@icross.com"} */
         case SV_SEND_MSG:
             n_snd = (n_send_msg_t *)base;
-            snprintf(ret, len,
-            "{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\"}",
-                     "action", "sendmsg",
-                     "msg", n_snd->msg,
-                     "to", n_snd->to,
-                     "from", eme_user); /* TODO 考虑可设成全局用户 */
+            root = json_new_object();
+
+            label = json_new_string("action");
+            value = json_new_string("sendmsg");
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("msg");
+            value = json_new_string(n_snd->msg);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            label = json_new_string("to");
+            value = json_new_string(n_snd->to);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
             
+            label = json_new_string("from");
+            value = json_new_string(eme_user);
+            json_insert_child(label, value);
+            json_insert_child(root, label);
+
+            json_tree_to_string(root, &ret);
             if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
             }
+            free(ret);
+            json_free_value(&root);
             break;
             
         default:
