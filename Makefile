@@ -55,17 +55,11 @@ $(LIBECLIENT) : $(CLIENT_OBJ)
 $(LIBJSON) : $(JSONP_OBJ)
 	$(CC) -fPIC -shared -o $@ $^
 
-#.c.o:
-#	gcc -c -fPIC -o $@ $^
-
-depend:
-	@$(CC) $(CFLAGS) -MM *.c
-
 clean:
 	$(RM) $(ALL_OBJ) $(ALL_T) $(ALL_LIB)
 
 # list targets that do not create files
-.PHONY: clean all depend
+.PHONY: clean all
 
 # DO NOT DELETE(depend)
 conn.o: conn.c common.h elog.h recver.h conn.h
@@ -77,8 +71,8 @@ elistener.o: elistener.c elistener.h netreq.h common.h elog.h
 elog.o: elog.c elog.h common.h
 emain.o: emain.c erequest.h common.h elog.h memdef.h ctrlagent.h netreq.h \
  netagent.h trigger.h list.h emain.h conn.h
-eparser.o: eparser.c common.h elog.h netreq.h eparser.h json.h trigger.h \
- memdef.h list.h elistener.h sender.h conn.h
+eparser.o: eparser.c common.h elog.h netreq.h eparser.h jsonpro.h \
+ trigger.h memdef.h list.h elistener.h sender.h conn.h json.h
 erequest.o: erequest.c erequest.h common.h elog.h trigger.h memdef.h \
  list.h
 json.o: json.c json.h

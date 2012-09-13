@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include "erequest.h"
+#include "jsonpro.h"
 #include "trigger.h"
 #include "eparser.h"
 #include "recver.h"
@@ -34,6 +35,7 @@ static int recv_thread_status = 0;
 int eme_recv(conn_t *con, char *buf, size_t len)
 {
     int err, rec_bytes, start;
+    char *ptr = NULL;
 #ifdef D_EME_SOCKET
     char _str[E_MAXLINE + 1];
     char *_ptr = NULL;
@@ -50,6 +52,16 @@ int eme_recv(conn_t *con, char *buf, size_t len)
     {
         rec_bytes = recv(con->fd, buf, len, 0);
         buf[rec_bytes] = '\0';
+        ptr = strstr(buf, "\r");
+        if (ptr != NULL)
+        {
+            buf[ptr - buf] = '\0';
+        }
+        ptr = strstr(buf, "\n");
+        if (ptr != NULL)
+        {
+            buf[ptr - buf] = '\0';
+        }
 #ifdef D_EME_SOCKET
         strncpy(_str, buf, len);
         _str[len] ='\0';
@@ -108,7 +120,7 @@ void *daemon_recver(void *arg)
     /* tv.tv_sec = 10; */
     /* tv.tv_usec = 1000; */
     ready = 0;
-    while (start)
+    while (start) /* server down, client cost CPU ! */
     {
         /* 默认阻塞式 */
         ready = e_select(max_fd, &rset, NULL, NULL, NULL);

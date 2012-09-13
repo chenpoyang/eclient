@@ -5,12 +5,12 @@
 #include "common.h"
 #include "netreq.h"
 #include "eparser.h"
-#include "json.h"
+#include "jsonpro.h"
 #include "trigger.h"
 #include "elistener.h"
 #include "sender.h"
 #include "conn.h"
-
+#include "json.h"
 /**
  * @brief  将用户请求sv_type的数据base压缩成ret字符数组, 并用ret返回
  * @param  sv_type 用户的请求类型, 如n_login_t
@@ -44,23 +44,24 @@ int e_compress(const req_srv_t sv_type, const void *base, char *str, size_t len)
             login = (n_login_t *)base;
             root = json_new_object();
 
-            label = json_new_string("action");
-            value = json_new_string("login");
+            label = json_new_string(EME_LOGIN_ACTION_KEY);
+            value = json_new_string(EME_LOGIN_VALUE_KEY);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("userid");
+            label = json_new_string(EME_LOGIN_USER_KEY);
             value = json_new_string(login->usr);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("password");
+            label = json_new_string(EME_LOGIN_PWD_KEY);
             value = json_new_string(login->pwd);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
             json_tree_to_string(root, &ret);
-            if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
+            if (eme_send(con, ret, strlen(ret)) !=
+                strlen(ret) + strlen(EME_JSON_SPLIT))
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
@@ -75,28 +76,29 @@ int e_compress(const req_srv_t sv_type, const void *base, char *str, size_t len)
             reg = (n_register_t *)base;
             root = json_new_object();
 
-            label = json_new_string("action");
-            value = json_new_string("reg");
+            label = json_new_string(EME_REGISTER_ACTION_KEY);
+            value = json_new_string(EME_REGISTER_VALUE_KEY);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("user");
+            label = json_new_string(EME_REGISTER_USER_KEY);
             value = json_new_string(reg->usr);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("passwd");
+            label = json_new_string(EME_REGISTER_PWD_KEY);
             value = json_new_string(reg->pwd);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("repasswd");
+            label = json_new_string(EME_REGISTER_REPWD_KEY);
             value = json_new_string(reg->repwd);
             json_insert_child(label, value);
             json_insert_child(root, label);
             
             json_tree_to_string(root, &ret);
-            if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
+            if (eme_send(con, ret, strlen(ret)) !=
+                strlen(ret) + strlen(EME_JSON_SPLIT))
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;
@@ -112,28 +114,29 @@ int e_compress(const req_srv_t sv_type, const void *base, char *str, size_t len)
             n_snd = (n_send_msg_t *)base;
             root = json_new_object();
 
-            label = json_new_string("action");
-            value = json_new_string("sendmsg");
+            label = json_new_string(EME_SENDMSG_ACTION_KEY);
+            value = json_new_string(EME_SENDMSG_VALUE_KEY);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("msg");
+            label = json_new_string(EME_SENDMSG_MSG_KEY);
             value = json_new_string(n_snd->msg);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
-            label = json_new_string("to");
+            label = json_new_string(EME_SENDMSG_TO_KEY);
             value = json_new_string(n_snd->to);
             json_insert_child(label, value);
             json_insert_child(root, label);
             
-            label = json_new_string("from");
+            label = json_new_string(EME_SENDMSG_FROM_KEY);
             value = json_new_string(eme_user);
             json_insert_child(label, value);
             json_insert_child(root, label);
 
             json_tree_to_string(root, &ret);
-            if (eme_send(con, ret, strlen(ret) + 1) != strlen(ret) + 1)
+            if (eme_send(con, ret, strlen(ret)) !=
+                    strlen(ret) + strlen(EME_JSON_SPLIT))
             {
                 e_error("e_compress", "can not send data");
                 flg = EME_ERR;

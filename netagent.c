@@ -67,8 +67,8 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
             e_debug("deal_net_data",
                     "transfered from server success, type[%s] result[%d]",
                     "EV_LOGIN", login_res->result);
-            
             break;
+            
         case EV_REGISTER:
             reg_res = nty->nty;
 
@@ -83,6 +83,7 @@ static void deal_net_data(const void *base, size_t len) /* base 内存需管理 
             e_debug("deal_net_data",
                     "transfered from server success, type[%s] result[%d]",
                     "EV_SEND_MSG", snd_msg_res->result);
+            break;
             
         default:
             e_error("deal_net_data", "unknown data type!");

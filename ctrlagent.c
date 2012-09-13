@@ -178,7 +178,8 @@ void deal_dialog(int idx)
     int opr_id = -1;
 
     opr_id = dlg[idx].opr;
-    e_debug("deal_dialog", "enter:g_cmd_info[%d].handler->[%d]", opr_id, idx);
+    e_debug("deal_dialog",
+            "enter:g_cmd_info[%d].handler->[%d]", opr_id, idx);
 
     /**
      * 从negagent再次进入此函数后, 回调到用户并进入下一步,
@@ -206,12 +207,15 @@ void ctrl_eregister(size_t idx)
     net_notify_t *nty = NULL; /* 最终返回到netagent的回应数据, 类型未知 */
     req_srv_t evt = SV_REGISTER;
 
-    req = dlg[idx].req;
-    e_register = (e_register_t*)req->req;
-    n_register.idx = idx;
-    strcpy(n_register.usr, e_register->usr);
-    strcpy(n_register.pwd, e_register->pwd);
-    strcpy(n_register.repwd, e_register->repwd);
+    if (dlg[idx].step == DLG_STEP_INIT)
+    {
+        req = dlg[idx].req;
+        e_register = (e_register_t*)req->req;
+        n_register.idx = idx;
+        strcpy(n_register.usr, e_register->usr);
+        strcpy(n_register.pwd, e_register->pwd);
+        strcpy(n_register.repwd, e_register->repwd);
+    }
 
     control_dialog(idx, evt, &n_register, sizeof(n_register_t));
     
@@ -243,12 +247,16 @@ void ctrl_esend_msg(size_t idx)
     net_notify_t *nty = NULL;
     req_srv_t evt = SV_SEND_MSG;
 
-    req = dlg[idx].req;
-    e_snd = (e_send_msg_t*)req->req;
-    n_snd.idx = idx;
-    n_snd.type = e_snd->type;
-    strcpy(n_snd.msg, e_snd->msg);
-    strcpy(n_snd.to, e_snd->to);
+    /* 防止回调再次调用此函数出现 逻辑错误 */
+    if (dlg[idx].step == DLG_STEP_INIT)
+    {
+        req = dlg[idx].req;
+        e_snd = (e_send_msg_t*)req->req;
+        n_snd.idx = idx;
+        n_snd.type = e_snd->type;
+        strcpy(n_snd.msg, e_snd->msg);
+        strcpy(n_snd.to, e_snd->to);
+    }
 
     control_dialog(idx, evt, &n_snd, sizeof(n_send_msg_t));
 
@@ -288,12 +296,6 @@ control_dialog(size_t idx, const req_srv_t evt, void *data, size_t len)
         dlg[idx].step = DLG_STEP_RUN;
         dlg[idx].result = DLG_RES_IDLE;
         e_debug("control_dialog", "dlg[%d] has been initialized", idx);
-    }
-
-    if (dlg[idx].step != DLG_STEP_RUN)
-    {
-        e_error("control_dialog", "dialog finish or not exist!");
-        return;
     }
     
     if (DLG_RES_IDLE == dlg[idx].result)

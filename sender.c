@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include "jsonpro.h"
 #include "sender.h"
 #include "conn.h"
 #include "elog.h"
@@ -26,6 +27,9 @@ int eme_send(conn_t *con, char * const buf, const size_t len)
 {
     int snd_bytes, err, start;
     char str[E_MAXLINE + 1];
+#ifdef D_EME_SOCKET
+    char *_ptr = NULL;
+#endif
 
     if (con->state != CONNECTED)
     {
@@ -36,13 +40,20 @@ int eme_send(conn_t *con, char * const buf, const size_t len)
     start = 1;
     while (start)
     {
-        snprintf(str, E_MAXLINE, "%s\r\n", buf);
-        snd_bytes = send(con->fd, str, strlen(str) + 1, 0);
+        snprintf(str, E_MAXLINE, "%s%s", buf, EME_JSON_SPLIT);
+        /* 'strlen(str)', not 'strlen(str) + 1' */
+        snd_bytes = send(con->fd, str, strlen(str), 0);
+        str[snd_bytes] = '\0';
 #ifdef D_EME_SOCKET
-        printf("SEND: [%s]\n", buf);
+        _ptr = strstr(str, EME_JSON_SPLIT);
+        if (_ptr != NULL)
+        {
+            str[_ptr - str] = 0;
+        }
+        printf("SEND: [%s]\n", str);
 #endif
-        e_debug("eme_send", "fd (%d) send %d of %d, data = [%s]",
-                con->fd, snd_bytes, len, buf);
+        e_debug("eme_send", "fd (%d) send (%d) of (%d), data = [%s]",
+                con->fd, snd_bytes, len, str);
 
         if (snd_bytes > 0)
         {
@@ -62,7 +73,6 @@ int eme_send(conn_t *con, char * const buf, const size_t len)
         else
         {
             e_error("eme_send", "send() error");
-            printf("--------");
                         
             start = 0;
         }
