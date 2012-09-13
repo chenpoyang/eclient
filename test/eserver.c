@@ -113,6 +113,7 @@ void *recv_thrd(void *arg)   /* server for client */
     char *ptr = NULL;
     char res_str[MAX_BUF_LEN + 1];
 
+
     cli_ptr = (Client *)arg;
     sock_fd = cli_ptr->con_fd;
     while ((rec_bytes = recv(sock_fd, buf, sizeof(buf), 0)) > 0)

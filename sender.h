@@ -6,6 +6,6 @@
 #include "conn.h"
 
 void init_sender();
-int eme_send(conn_t *con, void * const buf, const size_t len);
+int eme_send(conn_t *con, char * const buf, const size_t len);
 
 #endif /* _SENDER_H_ */

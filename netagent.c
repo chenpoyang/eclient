@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "netagent.h"
@@ -155,8 +156,8 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
                     "new request in negagent, dlg[%d], usr[%s], pwd[%s]",
                     login->idx, login->usr, login->pwd);
             idx = login->idx;
-            
             break;
+            
         case SV_REGISTER:
             reg = (n_register_t *)base;
 
@@ -167,6 +168,8 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
                     reg->usr, reg->pwd);
 
             idx = reg->idx;
+            break;
+            
         case SV_SEND_MSG:
             n_snd = (n_send_msg_t *)base;
 
@@ -178,6 +181,7 @@ static int deal_ctrl_net(const req_srv_t sv_type, void *base)
                     n_snd->type, n_snd->msg, n_snd->to);
 
             idx = n_snd->idx;
+            break;
             
         default:
             idx = -1;

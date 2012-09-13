@@ -27,7 +27,7 @@ int e_compress(const req_srv_t sv_type, const void *base, char *str, size_t len)
     int flg = EME_OK;
     conn_t *con = NULL;
     char eme_user[] = "a@icross.com";
-    json_t *root = NULL, *entity = NULL, *label = NULL, *value = NULL;
+    json_t *root = NULL, *label = NULL, *value = NULL;
     char *ret = NULL;
     
     con = get_connection();

@@ -22,7 +22,7 @@ CLIENT_OBJ	= test_trigger.o
 JSON_OBJ    = test_ejson.o 
 MJSON_OBJ   = test_mjson.o
 SERVER_OBJ	= eserver.o
-ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(SERVER_OBJ) $(JSON_OBJ)
+ALL_OBJ     = $(CORE_OBJ) $(CLIENT_OBJ) $(SERVER_OBJ) $(JSON_OBJ) $(MJSON_OBJ)
 
 # .so .a
 LIBCORE  	=

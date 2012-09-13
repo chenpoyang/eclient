@@ -22,12 +22,10 @@ void init_sender()
  *
  * @return    
 cem */
-int eme_send(conn_t *con, void * const buf, const size_t len)
+int eme_send(conn_t *con, char * const buf, const size_t len)
 {
     int snd_bytes, err, start;
-#ifdef D_EME_SOCKET
-    char str[E_MAXLINE];
-#endif
+    char str[E_MAXLINE + 1];
 
     if (con->state != CONNECTED)
     {
@@ -38,11 +36,10 @@ int eme_send(conn_t *con, void * const buf, const size_t len)
     start = 1;
     while (start)
     {
-        snd_bytes = send(con->fd, buf, len, 0);
+        snprintf(str, E_MAXLINE, "%s\r\n", buf);
+        snd_bytes = send(con->fd, str, strlen(str) + 1, 0);
 #ifdef D_EME_SOCKET
-        strncpy(str, buf, len);
-        str[len] = '\0';
-        printf("SEND:\t[%s]\n", str);
+        printf("SEND: [%s]\n", buf);
 #endif
         e_debug("eme_send", "fd (%d) send %d of %d, data = [%s]",
                 con->fd, snd_bytes, len, buf);
@@ -59,11 +56,14 @@ int eme_send(conn_t *con, void * const buf, const size_t len)
         if (err == EAGAIN || err == EINTR)
         {
             e_error("eme_send", "send() not ready");
+            
             continue;
         }
         else
         {
             e_error("eme_send", "send() error");
+            printf("--------");
+                        
             start = 0;
         }
     }

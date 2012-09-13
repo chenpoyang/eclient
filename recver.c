@@ -31,9 +31,13 @@ static int recv_thread_status = 0;
  *
  * @return   返回接收到的字节数, 反之错误
  */
-int eme_recv(conn_t *con, void *buf, size_t len)
+int eme_recv(conn_t *con, char *buf, size_t len)
 {
     int err, rec_bytes, start;
+#ifdef D_EME_SOCKET
+    char _str[E_MAXLINE + 1];
+    char *_ptr = NULL;
+#endif
 
     if (con->state != CONNECTED)
     {
@@ -45,7 +49,22 @@ int eme_recv(conn_t *con, void *buf, size_t len)
     while (start)
     {
         rec_bytes = recv(con->fd, buf, len, 0);
-
+        buf[rec_bytes] = '\0';
+#ifdef D_EME_SOCKET
+        strncpy(_str, buf, len);
+        _str[len] ='\0';
+        _ptr = strstr(_str, "\n");
+        if (_ptr != NULL)
+        {
+            _str[_ptr - _str] = '\0';
+        }
+        _ptr = strstr(_str, "\r");
+        if (_ptr != NULL)
+        {
+            _str[_ptr - _str] = '\0';
+        }
+        printf("RECV: [%s]\n", _str);
+#endif
         e_debug("eme_recv", "fd (%d) recv %d of %d", con->fd, rec_bytes, len);
 
         if (rec_bytes > 0)
@@ -78,11 +97,7 @@ void *daemon_recver(void *arg)
     int recv_bytes, start = 0, max_fd = -2, ready;
     conn_t *con = (conn_t*)arg;
     fd_set rset; /* 读集合 */
-    struct timeval tv; /* 等待1秒 */
-#ifdef D_EME_SOCKET
-    int len;
-    char str[E_MAXLINE];
-#endif
+    /* struct timeval tv; /\* 等待1秒 *\/ */
 
     e_debug("daemon_recver", "revcer thread start!");
 
@@ -90,8 +105,8 @@ void *daemon_recver(void *arg)
     FD_ZERO(&rset);
     FD_SET(con->fd, &rset);
     max_fd = con->fd > max_fd ? con->fd + 1 : max_fd + 1;
-    tv.tv_sec = 10;
-    tv.tv_usec = 1000;
+    /* tv.tv_sec = 10; */
+    /* tv.tv_usec = 1000; */
     ready = 0;
     while (start)
     {
@@ -100,12 +115,6 @@ void *daemon_recver(void *arg)
         if (ready > 0)
         {
             recv_bytes = eme_recv(con, buf, MAX_RECV_BUF);
-#ifdef D_EME_SOCKET
-            len = recv_bytes;
-            strncpy(str, buf, len);
-            str[len] = '\0';
-            printf("RECV:\t[%s]\n", str);
-#endif            
             buf[recv_bytes] = '\0';
             /* 交给协议解析模块 */
             e_decompress(buf, recv_bytes + 1);

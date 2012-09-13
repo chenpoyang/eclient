@@ -88,13 +88,20 @@ int init_net_state(const char *host, int port)
     {
         con.fd = sofd;
         con.state = CONNECTED;
+#ifdef D_EME_SOCKET
+        printf("connected!\n");
+#endif
 
         e_debug("init_net_state", "ok, already connected to host[%s]", host);
     }
     else
-    {con.fd = -1;
+    {
+        con.fd = -1;
         con.state = DISCONNECTED;
         e_error("init_net_state", "failed, unable connect to host[%s]", host);
+#ifdef D_EME_SOCKET
+        printf("connect failed!\n");
+#endif  
     }
 
     pthread_mutex_lock(&_con_mtx);

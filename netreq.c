@@ -104,6 +104,4 @@ void net_esnd_msg(const req_srv_t sv_type, const n_send_msg_t *n_snd)
     e_debug("net_esnd_msg", "add <net_esnd_msg> listener!");
 
     e_compress(sv_type, n_snd, str, sizeof(str));
-    
-    return;
 }
