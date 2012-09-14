@@ -38,6 +38,11 @@ extern "C"
 {
 #endif
 
+/* not define in android, [2012-09-14::10:43:45] */
+#ifndef SIZE_MAX
+#define SIZE_MAX 4096
+#endif
+
 #define JSON_MAX_STRING_LENGTH SIZE_MAX-1
 
 /**
