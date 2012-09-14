@@ -3028,7 +3028,8 @@ json_saxy_parse (struct json_saxy_parser_status *jsps, struct json_saxy_function
 		case '\\':
 			if (!jsps->string_length_limit_reached)
 			{
-				if (rcs_length ((jsps->temp)) < JSON_MAX_STRING_LENGTH - 1)	/* check if there is space for a two character escape sequence */
+                /* check if there is space for a two character escape sequence */
+				if (rcs_length ((jsps->temp)) < JSON_MAX_STRING_LENGTH - 1)
 				{
 					if (rcs_catc ((jsps->temp), '\\') != RS_OK)
 					{
