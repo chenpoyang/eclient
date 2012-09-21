@@ -49,7 +49,7 @@ send_net_notify(const int idx, const nty_evt_t ev_type, void *base, size_t len)
 {
     net_notify_t nty = {ev_type};
 
-    /* 接收服务端传过来的消息, e_compress(..)已申请内存, 不需cp, 直接修改指针 */
+    /* 接收服务端传过来的消息, e_decompress(..)已申请内存, 不需cp, 直接修改指针 */
     nty.nty = base;
 
     e_debug("net_notify", "received data from server, send net notify");

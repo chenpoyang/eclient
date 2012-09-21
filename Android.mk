@@ -1,4 +1,4 @@
-LOCAL_PATH := $(call my-dir)
+	LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := trigger
@@ -26,6 +26,15 @@ LOCAL_SRC_FILES := recver.c conn.c ctrlagent.c eevent.c elistener.c \
 LOCAL_C_INCLUDES := $(LOCAL_PATH)
 LOCAL_LDLIBS := -lc -ldl -lm -lz -llog
 LOCAL_SHARED_LIBRARIES := trigger ejson
+LOCAL_CFLAGS := -Wno-write-strings -g -DRCS
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := jniclient
+LOCAL_SRC_FILES := jni_interface.c 
+LOCAL_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_LDLIBS := -lc -ldl -lm -lz -llog
+LOCAL_SHARED_LIBRARIES := trigger
 LOCAL_CFLAGS := -Wno-write-strings -g -DRCS
 include $(BUILD_SHARED_LIBRARY)
 

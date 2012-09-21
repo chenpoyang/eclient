@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in srv;
     int sock_fd, chk, con_fd;
     pthread_attr_t attr;
-    char *host = "127.0.0.1", *port = "8888";
+    char *host = "192.168.1.219", *port = "8888";
 
     if (argc != 3)
 	{
