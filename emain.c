@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
     init_agent(NET_AGENT_ID, "netagent", netagent);
 
     /* 初始化连接和初始化接收线程 */
-    init_net_state("192.168.1.219", 8888);
+    init_net_state("127.0.0.1", 8888);
     /* init_net_state("127.0.0.1", 8888); */
     /* init_net_state("192.168.1.20", 4321); */
 
